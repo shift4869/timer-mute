@@ -13,7 +13,7 @@ logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
-class MuterBase():
+class Muter():
     screen_name: str
     twitter_session: TwitterSession
     redirect_urls: list[str]
@@ -53,10 +53,16 @@ class MuterBase():
         )
         return response
 
-    def unmute_keyword(self, mute_keyword_id: str) -> Response:
+    def unmute_keyword(self, keyword: str) -> Response:
         url = "https://twitter.com/i/api/1.1/mutes/keywords/destroy.json"
+
+        response = self.get_mute_keyword_list()
+        r_dict: dict = json.loads(response.text)
+        target_keyword_dict: dict = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == keyword][0]
+        unmute_keyword_id = target_keyword_dict.get("id")
+
         payload = {
-            "ids": mute_keyword_id,
+            "ids": unmute_keyword_id,
         }
         response: Response = self.twitter_session.api_post(
             url,
@@ -97,9 +103,8 @@ if __name__ == "__main__":
     if not config.read(CONFIG_FILE_NAME, encoding="utf8"):
         raise IOError
 
-    screen_name = config["twitter_noapi"]["screen_name"]
-    bearer_token = config["twitter_noapi"]["bearer_token"]
-    muter = MuterBase(screen_name, bearer_token)
+    screen_name = config["twitter"]["screen_name"]
+    muter = Muter(screen_name)
 
     response = muter.mute_user("_shift4869")
     pprint.pprint(response.text)
@@ -115,5 +120,5 @@ if __name__ == "__main__":
     # sleep(10)
     # target_keyword_dict: dict = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == "てすと"][0]
     # unmute_keyword_id = target_keyword_dict.get("id")
-    # response = muter.unmute_keyword(unmute_keyword_id)
+    # response = muter.unmute_keyword("てすと")
     # pprint.pprint(response.text)

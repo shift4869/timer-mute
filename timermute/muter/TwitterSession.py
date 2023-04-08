@@ -1,13 +1,9 @@
 # coding: utf-8
 import asyncio
-import json
-import random
-import re
 import sys
 from dataclasses import dataclass
 from logging import INFO, getLogger
 from pathlib import Path
-from time import sleep
 from typing import ClassVar, Self
 
 import pyppeteer
@@ -38,6 +34,7 @@ class TwitterSession():
     session: ClassVar[AsyncHTMLSession]        # 非同期セッション
     loop: ClassVar[asyncio.AbstractEventLoop]  # イベントループ
     ct0: ClassVar[str]
+    auth_token: ClassVar[str]
 
     # 接続時に使用するヘッダー
     HEADERS = {
@@ -134,6 +131,8 @@ class TwitterSession():
         for c in self.cookies.cookies:
             if c.name == "ct0":
                 object.__setattr__(self, "ct0", c.value)
+            if c.name == "auth_token":
+                object.__setattr__(self, "auth_token", c.value)
             d = {
                 "name": c.name,
                 "value": c.value,
@@ -222,6 +221,7 @@ class TwitterSession():
         headers["authorization"] = self.bearer_token.bearer_token
         headers["content-type"] = "application/x-www-form-urlencoded"
         headers["x-csrf-token"] = self.ct0
+        headers["cookie"] = f"auth_token={self.auth_token}; ct0={self.ct0}"
         response = await self.async_request(
             request_url,
             params,
@@ -403,9 +403,8 @@ if __name__ == "__main__":
     config.read(CONFIG_FILE_NAME, encoding="utf8")
 
     try:
-        screen_name = config["twitter_noapi"]["screen_name"]
-        bearer_token = config["twitter_noapi"]["bearer_token"]
-        twitter_session = TwitterSession.create(screen_name, bearer_token)
+        screen_name = config["twitter"]["screen_name"]
+        twitter_session = TwitterSession.create(screen_name)
         response = twitter_session.prepare()
         print(response.text)
     except Exception as e:
