@@ -118,7 +118,7 @@ class Cookies():
                 "path": c.path,
                 "domain": c.domain,
                 "secure": c.secure,
-                "httponly": c._rest["HttpOnly"],
+                "httponly": c._rest.get("HttpOnly", False),
             }
             cookies_dict_list.append(cookies_dict)
         result_dict = {

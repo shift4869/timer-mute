@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 
 import PySimpleGUI as sg
+from timermute.db.MuteUserDB import MuteUserDB
 
 from timermute.db.MuteWordDB import MuteWordDB
 
@@ -38,8 +39,9 @@ def popup_get_text(message, title=None, default_text='', password_char='', size=
 def update_mute_word_table(window: sg.Window, mute_word_db: MuteWordDB) -> None:
     """mute_word テーブルを更新する
     """
+    # TODO::index保存
+
     # 画面表示更新
-    table_data = window["-LIST_1-"].Values
     mute_word_list = mute_word_db.select()
     mute_word_list_1 = [r for r in mute_word_list if r.status == "unmuted"]
     mute_word_list_2 = [r for r in mute_word_list if r.status == "muted"]
@@ -52,6 +54,38 @@ def update_mute_word_table(window: sg.Window, mute_word_db: MuteWordDB) -> None:
     window["-LIST_1-"].update(values=table_data)
     table_data = [record_exclude_status(r) for r in mute_word_list_2]
     window["-LIST_2-"].update(values=table_data)
+
+    # 新着マイリストの背景色とテキスト色を変更する
+    # update(values=list_data)で更新されるとデフォルトに戻る？
+    # 強調したいindexのみ適用すればそれ以外はデフォルトになる
+    # for i in include_new_index_list:
+    #     window["-LIST-"].Widget.itemconfig(i, fg="black", bg="light pink")
+
+    # indexをセットしてスクロール
+    # scroll_to_indexは強制的にindexを一番上に表示するのでWidget.seeを使用
+    # window["-LIST_1-"].Widget.see(index_1)
+    # window["-LIST_1-"].update(set_to_index=index_1)
+    return
+
+
+def update_mute_user_table(window: sg.Window, mute_user_db: MuteUserDB) -> None:
+    """mute_user テーブルを更新する
+    """
+    # TODO::index保存
+
+    # 画面表示更新
+    mute_user_list = mute_user_db.select()
+    mute_user_list_1 = [r for r in mute_user_list if r.status == "unmuted"]
+    mute_user_list_2 = [r for r in mute_user_list if r.status == "muted"]
+
+    def record_exclude_status(record):
+        r_dict: dict = record.to_dict()
+        del r_dict["status"]
+        return list(r_dict.values())
+    table_data = [record_exclude_status(r) for r in mute_user_list_1]
+    window["-LIST_3-"].update(values=table_data)
+    table_data = [record_exclude_status(r) for r in mute_user_list_2]
+    window["-LIST_4-"].update(values=table_data)
 
     # 新着マイリストの背景色とテキスト色を変更する
     # update(values=list_data)で更新されるとデフォルトに戻る？

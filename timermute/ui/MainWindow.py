@@ -10,7 +10,7 @@ import PySimpleGUI as sg
 
 from timermute.db.MuteUserDB import MuteUserDB
 from timermute.db.MuteWordDB import MuteWordDB
-from timermute.process import MuteWordAdd, MuteWordDel, MuteWordMute, MuteWordUnmute
+from timermute.process import MuteUserAdd, MuteUserDel, MuteUserMute, MuteUserUnmute, MuteWordAdd, MuteWordDel, MuteWordMute, MuteWordUnmute
 from timermute.ui.GuiFunction import update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
 
@@ -32,6 +32,10 @@ class MainWindow():
             "-MUTE_WORD_DEL-": MuteWordDel.MuteWordDel,
             "-MUTE_WORD_MUTE-": MuteWordMute.MuteWordMute,
             "-MUTE_WORD_UNMUTE-": MuteWordUnmute.MuteWordUnmute,
+            "-MUTE_USER_ADD-": MuteUserAdd.MuteUserAdd,
+            "-MUTE_USER_DEL-": MuteUserDel.MuteUserDel,
+            "-MUTE_USER_MUTE-": MuteUserMute.MuteUserMute,
+            "-MUTE_USER_UNMUTE-": MuteUserUnmute.MuteUserUnmute,
         }
 
         # configファイルロード
@@ -171,7 +175,7 @@ class MainWindow():
 
         while True:
             event, values = self.window.read()
-            print(f"event={event} values={values}")
+            # print(f"event={event} values={values}")
             if event in [sg.WIN_CLOSED, "-EXIT-"]:
                 break
 

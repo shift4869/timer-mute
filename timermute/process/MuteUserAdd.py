@@ -5,39 +5,32 @@ import PySimpleGUI as sg
 
 from timermute.muter.Muter import Muter
 from timermute.process.Base import Base
-from timermute.ui.GuiFunction import popup_get_text, update_mute_word_table
+from timermute.ui.GuiFunction import popup_get_text, update_mute_user_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
-class MuteWordAdd(Base):
+class MuteUserAdd(Base):
     def __init__(self) -> None:
         pass
 
     def run(self, mw: MainWindowInfo) -> None:
-        # try:
-        #     self.window = mw.window
-        #     self.values = mw.values
-        #     self.mute_word = mw.mute_word
-        #     self.mute_user = mw.mute_user
-        # except AttributeError:
-        #     logger.error("Create mylist done failed, argument error.")
-        mute_word_str = popup_get_text("mute word input.")
-        if not mute_word_str:
+        mute_user_str = popup_get_text("mute user input.")
+        if not mute_user_str:
             return
 
         # デフォルトでミュートする
         config = mw.config
         screen_name = config["twitter"]["screen_name"]
         muter = Muter(screen_name)
-        response = muter.mute_keyword(mute_word_str)
+        response = muter.mute_user(mute_user_str)
         print(response)
 
-        mw.mute_word_db.upsert(mute_word_str)
+        mw.mute_user_db.upsert(mute_user_str)
 
-        update_mute_word_table(mw.window, mw.mute_word_db)
+        update_mute_user_table(mw.window, mw.mute_user_db)
         return
 
 

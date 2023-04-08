@@ -17,6 +17,7 @@ class MuteWordUnmute(Base):
         pass
 
     def run(self, mw: MainWindowInfo) -> None:
+        # "-MUTE_WORD_UNMUTE-"
         index_list = mw.values["-LIST_2-"]
         mute_word_list_all = mw.window["-LIST_2-"].get()
         mute_word_list = []
@@ -31,8 +32,9 @@ class MuteWordUnmute(Base):
         muter = Muter(screen_name)
         for mute_word in mute_word_list:
             mute_word_str = mute_word[1]
-            mw.mute_word_db.unmute(mute_word_str)
             response = muter.unmute_keyword(mute_word_str)
+            print(response)
+            mw.mute_word_db.unmute(mute_word_str)
 
         update_mute_word_table(mw.window, mw.mute_word_db)
         return

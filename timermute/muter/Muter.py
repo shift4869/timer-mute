@@ -106,19 +106,23 @@ if __name__ == "__main__":
     screen_name = config["twitter"]["screen_name"]
     muter = Muter(screen_name)
 
-    response = muter.mute_user("_shift4869")
-    pprint.pprint(response.text)
-    sleep(10)
-    response = muter.unmute_user("_shift4869")
-    pprint.pprint(response.text)
+    # response = muter.mute_user("_shift4869")
+    # pprint.pprint(response.text)
+    # sleep(10)
+    # response = muter.unmute_user("_shift4869")
+    # pprint.pprint(response.text)
 
     # response = muter.mute_keyword("てすと")
     # pprint.pprint(response.text)
     response = muter.get_mute_keyword_list()
     r_dict: dict = json.loads(response.text)
     pprint.pprint(r_dict)
-    # sleep(10)
+    sleep(10)
     # target_keyword_dict: dict = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == "てすと"][0]
     # unmute_keyword_id = target_keyword_dict.get("id")
     # response = muter.unmute_keyword("てすと")
     # pprint.pprint(response.text)
+
+    response = muter.get_mute_keyword_list()
+    r_dict: dict = json.loads(response.text)
+    pprint.pprint(r_dict)

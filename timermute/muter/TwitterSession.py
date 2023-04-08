@@ -4,6 +4,7 @@ import sys
 from dataclasses import dataclass
 from logging import INFO, getLogger
 from pathlib import Path
+from time import sleep
 from typing import ClassVar, Self
 
 import pyppeteer
@@ -20,7 +21,7 @@ logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
-@dataclass(frozen=True)
+@dataclass()
 class TwitterSession():
     """Twitterセッション
 
@@ -36,10 +37,6 @@ class TwitterSession():
     ct0: ClassVar[str]
     auth_token: ClassVar[str]
 
-    # 接続時に使用するヘッダー
-    HEADERS = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"
-    }
     # トップページ
     TOP_URL = "https://twitter.com/"
     # ログインページ
@@ -51,11 +48,10 @@ class TwitterSession():
 
         # イベントループ設定
         # 一つのものを使い回す
-        object.__setattr__(self, "loop", asyncio.new_event_loop())
+        self.loop = asyncio.new_event_loop()
 
         # クッキーとローカルストレージをセットしたセッションを保持する
-        session = self.loop.run_until_complete(self._get_session())
-        object.__setattr__(self, "session", session)
+        self.session = self.loop.run_until_complete(self._get_session())
 
         # 正しくセッションが作成されたか確認
         if not self._is_valid_session():
@@ -64,7 +60,9 @@ class TwitterSession():
 
     @property
     def headers(self) -> dict:
-        headers = TwitterSession.HEADERS
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"
+        }
         return headers
 
     def _is_valid_args(self) -> bool:
@@ -130,9 +128,9 @@ class TwitterSession():
         # クッキーをセットする
         for c in self.cookies.cookies:
             if c.name == "ct0":
-                object.__setattr__(self, "ct0", c.value)
+                self.ct0 = c.value
             if c.name == "auth_token":
-                object.__setattr__(self, "auth_token", c.value)
+                self.auth_token = c.value
             d = {
                 "name": c.name,
                 "value": c.value,
@@ -183,7 +181,7 @@ class TwitterSession():
             case _:
                 raise ValueError('async_request argument "method" is not in ["GET", "POST"]')
 
-        headers = headers or TwitterSession.HEADERS
+        headers = headers or self.headers
         cookies = cookies or self.cookies.cookies
         response: Response = await request_func(
             request_url,
@@ -192,6 +190,27 @@ class TwitterSession():
             cookies=cookies
         )
         response.raise_for_status()
+
+        # 新しいクッキーを保存しなおす処理
+        # new_cookies = response.cookies
+        # new_cookies_list = Cookies.requests_cookie_jar_to_dict(new_cookies).get("cookies", [])
+        # prev_cookies_list = Cookies.requests_cookie_jar_to_dict(self.cookies.cookies).get("cookies", [])
+
+        # for new_dict in new_cookies_list:
+        #     for i, prev_dict in enumerate(prev_cookies_list):
+        #         if new_dict.get("name") == prev_dict.get("name"):
+        #             prev_cookies_list[i] = new_dict
+
+        # Cookies.save(prev_cookies_list)
+        # self.cookies = Cookies.create()
+        # for c in self.cookies.cookies:
+        #     if c.name == "ct0":
+        #         self.ct0 = c.value
+        #     if c.name == "auth_token":
+        #         self.auth_token = c.value
+
+        # TODO新しいローカルストレージを保存しなおす処理
+
         return response
 
     async def async_page_request(self, request_url: str, params: dict = {}, method: str = "GET"):
@@ -199,7 +218,7 @@ class TwitterSession():
             request_url,
             params,
             method,
-            TwitterSession.HEADERS,
+            self.headers,
             self.cookies.cookies
         )
         await response.html.arender()
@@ -217,7 +236,13 @@ class TwitterSession():
         return response
 
     async def async_api_request(self, request_url: str, params: dict = {}, method: str = "GET"):
-        headers = TwitterSession.HEADERS
+        headers = {
+            "User-Agent": self.headers.get("User-Agent", ""),
+            "authorization": self.bearer_token.bearer_token,
+            "content-type": "application/x-www-form-urlencoded",
+            "x-csrf-token": self.ct0,
+            "cookie": f"auth_token={self.auth_token}; ct0={self.ct0}",
+        }
         headers["authorization"] = self.bearer_token.bearer_token
         headers["content-type"] = "application/x-www-form-urlencoded"
         headers["x-csrf-token"] = self.ct0
@@ -361,6 +386,10 @@ class TwitterSession():
 
     @classmethod
     def create(cls, screen_name) -> Self:
+        # シングルトン
+        if hasattr(cls, "_twittersession"):
+            return cls._twittersession
+
         # 以前に接続した時のクッキーとローカルストレージのファイルが存在しているならば
         RETRY_NUM = 5
         for i in range(RETRY_NUM):
@@ -370,6 +399,7 @@ class TwitterSession():
                 local_storage = LocalStorage.create()
                 twitter_session = TwitterSession(screen_name, bearer_token, cookies, local_storage)
                 logger.info("Getting Twitter session -> done")
+                cls._twittersession = twitter_session
                 return twitter_session
             except FileNotFoundError as e:
                 logger.info(f"No exist Cookies and LocalStorage file.")
@@ -390,6 +420,7 @@ class TwitterSession():
         loop.close()
         twitter_session = TwitterSession(screen_name, bearer_token, cookies, local_storage)
         logger.info("Getting Twitter session -> done")
+        cls._twittersession = twitter_session
         return twitter_session
 
 
@@ -407,5 +438,10 @@ if __name__ == "__main__":
         twitter_session = TwitterSession.create(screen_name)
         response = twitter_session.prepare()
         print(response.text)
+
+        sleep(10)
+        twitter_session = TwitterSession.create(screen_name)
+        response = twitter_session.prepare()
+        print(response.headers)
     except Exception as e:
         logger.exception(e)
