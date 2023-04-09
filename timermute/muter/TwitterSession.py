@@ -1,5 +1,6 @@
 # coding: utf-8
 import asyncio
+import json
 import sys
 from dataclasses import dataclass
 from logging import INFO, getLogger
@@ -96,11 +97,14 @@ class TwitterSession():
 
         # 取得結果の確認
         try:
-            div_tags: list[Element] = html.find("div")
-            div_tag = [dt for dt in div_tags if "アカウントメニュー" in dt.attrs.get("aria-label", "")][0]
-            img_tags: list[Element] = div_tag.find("img")
-            result = [self.screen_name == it.attrs.get("alt", "") for it in img_tags]
-            return any(result)
+            # div_tags: list[Element] = html.find("div")
+            # div_tag = [dt for dt in div_tags if "アカウントメニュー" in dt.attrs.get("aria-label", "")][0]
+            # img_tags: list[Element] = div_tag.find("img")
+            # result = [self.screen_name == it.attrs.get("alt", "") for it in img_tags]
+            # return any(result)
+            a_tags: list[Element] = html.find("a")
+            a_tag = [dt for dt in a_tags if "プロフィール" in dt.attrs.get("aria-label", "")][0]
+            return "/" + self.screen_name == a_tag.attrs.get("href", "")
         except Exception as e:
             pass
         return False
@@ -221,7 +225,7 @@ class TwitterSession():
             self.headers,
             self.cookies.cookies
         )
-        await response.html.arender()
+        await response.html.arender(wait=1, sleep=1)
         return response
 
     def page_request(self, request_url: str, params: dict = {}, method: str = "GET"):
@@ -315,15 +319,28 @@ class TwitterSession():
         cookies = await page.cookies()
         logger.info("Twitter Login Page loaded.")
 
-        # ツイッターログインが完了したかどうかユーザに問い合せる
-        async def ainput(string: str) -> str:
-            await asyncio.get_event_loop().run_in_executor(
-                None, lambda s=string: sys.stdout.write(s + ' ')
-            )
-            return await asyncio.get_event_loop().run_in_executor(
-                None, sys.stdin.readline
-            )
-        user_response = await ainput("Twitter Login complete ? (y,n):")
+        # # ツイッターログインが完了したかどうかユーザに問い合せる
+        # async def ainput(string: str) -> str:
+        #     await asyncio.get_event_loop().run_in_executor(
+        #         None, lambda s=string: sys.stdout.write(s + ' ')
+        #     )
+        #     return await asyncio.get_event_loop().run_in_executor(
+        #         None, sys.stdin.readline
+        #     )
+        # user_response = await ainput("Twitter Login complete ? (y,n):")
+        while True:
+            if not bsp.is_file():
+                await asyncio.sleep(1)
+                continue
+            bsp_result: dict = {}
+            with bsp.open(mode="r") as fin:
+                bsp_result = json.load(fin)
+            if bsp_result.get("authorization", "") != "":
+                break
+            await asyncio.sleep(1)
+            pass
+
+        await page.waitForNavigation()
 
         # TODO::ツイッターログインが成功かどうか調べる
         content = await page.content()
@@ -382,6 +399,8 @@ class TwitterSession():
         local_storage = LocalStorage.create()
         logger.info("Getting local_storage is success.")
 
+        await browser.close()
+
         return bearer_token, cookies, local_storage
 
     @classmethod
@@ -405,6 +424,7 @@ class TwitterSession():
                 logger.info(f"No exist Cookies and LocalStorage file.")
                 break
             except Exception as e:
+                logger.warning(e)
                 logger.info(f"Cookies and LocalStorage loading retry ... ({i+1}/{RETRY_NUM}).")
         else:
             logger.info(f"Retry num is exceed RETRY_NUM={RETRY_NUM}.")

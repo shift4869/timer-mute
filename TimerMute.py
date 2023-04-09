@@ -1,9 +1,8 @@
 # coding: utf-8
-import argparse
 import logging.config
-import os
 from logging import INFO, getLogger
-from pathlib import Path
+
+from timermute.ui.MainWindow import MainWindow
 
 logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
 for name in logging.root.manager.loggerDict:
@@ -15,4 +14,5 @@ logger.setLevel(INFO)
 
 
 if __name__ == "__main__":
-    logger.info("OK")
+    main_window = MainWindow()
+    main_window.run()
