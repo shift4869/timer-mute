@@ -13,6 +13,7 @@ class MuteWord(Base):
         [status] TEXT,
         [created_at] TEXT,
         [updated_at] TEXT,
+        [unmuted_at] TEXT,
         PRIMARY KEY([id])
     """
 
@@ -23,16 +24,18 @@ class MuteWord(Base):
     status = Column(String(128), default="unmuted")
     created_at = Column(String(256))
     updated_at = Column(String(256))
+    unmuted_at = Column(String(256))
 
     def __init__(self, *args, **kwargs):
         super(Base, self).__init__(*args, **kwargs)
 
-    def __init__(self, keyword, status, created_at, updated_at):
+    def __init__(self, keyword, status, created_at, updated_at, unmuted_at):
         # self.id = id
         self.keyword = keyword
         self.status = status
         self.created_at = created_at
         self.updated_at = updated_at
+        self.unmuted_at = unmuted_at
 
     def __repr__(self):
         return "<MuteWord(id='{}', keyword='{}')>".format(self.id, self.keyword)
@@ -47,7 +50,40 @@ class MuteWord(Base):
             "status": self.status,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "unmuted_at": self.unmuted_at,
         }
+
+    def to_muted_table_list(self) -> list[str]:
+        # {
+        #     "id": self.id,
+        #     "keyword": self.keyword,
+        #     "updated_at": self.updated_at,
+        #     "unmuted_at": self.unmuted_at,
+        # }
+        # -> [id, keyword, updated_at, unmuted_at]
+        d = self.to_dict()
+        return [
+            d.get("id"),
+            d.get("keyword"),
+            d.get("updated_at"),
+            d.get("unmuted_at"),
+        ]
+
+    def to_unmuted_table_list(self) -> list[str]:
+        # {
+        #     "id": self.id,
+        #     "keyword": self.keyword,
+        #     "updated_at": self.updated_at,
+        #     "created_at": self.created_at,
+        # }
+        # -> [id, keyword, updated_at, created_at]
+        d = self.to_dict()
+        return [
+            d.get("id"),
+            d.get("keyword"),
+            d.get("updated_at"),
+            d.get("created_at"),
+        ]
 
 
 class MuteUser(Base):
@@ -58,6 +94,7 @@ class MuteUser(Base):
         [status] TEXT,
         [created_at] TEXT,
         [updated_at] TEXT,
+        [unmuted_at] TEXT,
         PRIMARY KEY([id])
     """
 
@@ -68,16 +105,18 @@ class MuteUser(Base):
     status = Column(String(128), default="unmute")
     created_at = Column(String(256))
     updated_at = Column(String(256))
+    unmuted_at = Column(String(256))
 
     def __init__(self, *args, **kwargs):
         super(Base, self).__init__(*args, **kwargs)
 
-    def __init__(self, screen_name, status, created_at, updated_at):
+    def __init__(self, screen_name, status, created_at, updated_at, unmuted_at):
         # self.id = id
         self.screen_name = screen_name
         self.status = status
         self.created_at = created_at
         self.updated_at = updated_at
+        self.unmuted_at = unmuted_at
 
     def __repr__(self):
         return "<MuteUser(id='{}', screen_name='{}')>".format(self.id, self.screen_name)
@@ -92,7 +131,40 @@ class MuteUser(Base):
             "status": self.status,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "unmuted_at": self.unmuted_at,
         }
+
+    def to_muted_table_list(self) -> list[str]:
+        # {
+        #     "id": self.id,
+        #     "screen_name": self.screen_name,
+        #     "updated_at": self.updated_at,
+        #     "unmuted_at": self.unmuted_at,
+        # }
+        # -> [id, screen_name, updated_at, unmuted_at]
+        d = self.to_dict()
+        return [
+            d.get("id"),
+            d.get("screen_name"),
+            d.get("updated_at"),
+            d.get("unmuted_at"),
+        ]
+
+    def to_unmuted_table_list(self) -> list[str]:
+        # {
+        #     "id": self.id,
+        #     "screen_name": self.screen_name,
+        #     "updated_at": self.updated_at,
+        #     "created_at": self.created_at,
+        # }
+        # -> [id, screen_name, updated_at, created_at]
+        d = self.to_dict()
+        return [
+            d.get("id"),
+            d.get("screen_name"),
+            d.get("updated_at"),
+            d.get("created_at"),
+        ]
 
 
 if __name__ == "__main__":

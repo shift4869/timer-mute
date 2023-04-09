@@ -13,7 +13,7 @@ class MuteWordDB(Base):
     def __init__(self, db_fullpath: str = "mute.db"):
         super().__init__(db_fullpath)
 
-    def select(self):
+    def select(self) -> list[MuteWord]:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
         result = session.query(MuteWord).all()
@@ -23,7 +23,7 @@ class MuteWordDB(Base):
     def upsert(self, record: str | MuteWord):
         if isinstance(record, str):
             keyword = str(record)
-            record = MuteWord(keyword, "muted", self.now(), self.now())
+            record = MuteWord(keyword, "muted", self.now(), self.now(), "")
 
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
@@ -43,6 +43,7 @@ class MuteWordDB(Base):
             p.status = record.status
             p.created_at = record.created_at
             p.updated_at = record.updated_at
+            p.unmuted_at = record.unmuted_at
             res = 1
 
         session.commit()
@@ -69,6 +70,7 @@ class MuteWordDB(Base):
 
         target = session.query(MuteWord).filter(MuteWord.keyword == key).first()
         target.status = "muted"
+        target.updated_at = self.now()
         res = 0
 
         session.commit()
@@ -82,6 +84,7 @@ class MuteWordDB(Base):
 
         target = session.query(MuteWord).filter(MuteWord.keyword == key).first()
         target.status = "unmuted"
+        target.updated_at = self.now()
         res = 0
 
         session.commit()

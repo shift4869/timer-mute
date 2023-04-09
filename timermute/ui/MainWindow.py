@@ -88,6 +88,7 @@ class MainWindow():
             "key": "-LIST_1-",
             "right_click_menu": table_right_click_menu,
         }
+        table_cols_name = ["No.", "     ミュートワード     ", "     更新日時     ", "     解除日時     "]
         table_style2 = {
             "values": def_data,
             "headings": table_cols_name,
@@ -124,6 +125,7 @@ class MainWindow():
             "key": "-LIST_3-",
             "right_click_menu": table_right_click_menu,
         }
+        table_cols_name2 = ["No.", "    ミュートアカウント    ", "     更新日時     ", "     解除日時     "]
         table_style4 = {
             "values": def_data2,
             "headings": table_cols_name2,

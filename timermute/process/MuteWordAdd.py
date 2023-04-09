@@ -3,9 +3,11 @@ from logging import INFO, getLogger
 
 import PySimpleGUI as sg
 
+from timermute.db.Model import MuteWord
 from timermute.muter.Muter import Muter
 from timermute.process.Base import Base
-from timermute.ui.GuiFunction import popup_get_text, update_mute_word_table
+from timermute.timer.Timer import MuteWordUnmuteTimer
+from timermute.ui.GuiFunction import get_future_datetime, now, popup_get_interval, popup_get_text, update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
 
 logger = getLogger(__name__)
@@ -17,13 +19,7 @@ class MuteWordAdd(Base):
         pass
 
     def run(self, mw: MainWindowInfo) -> None:
-        # try:
-        #     self.window = mw.window
-        #     self.values = mw.values
-        #     self.mute_word = mw.mute_word
-        #     self.mute_user = mw.mute_user
-        # except AttributeError:
-        #     logger.error("Create mylist done failed, argument error.")
+        # ミュートワードをユーザーに問い合せる
         mute_word_str = popup_get_text("mute word input.")
         if not mute_word_str:
             return
@@ -35,8 +31,22 @@ class MuteWordAdd(Base):
         response = muter.mute_keyword(mute_word_str)
         print(response)
 
-        mw.mute_word_db.upsert(mute_word_str)
+        # 解除タイマー
+        # interval をユーザーに問い合せる
+        interval_min = popup_get_interval()  # min
+        if interval_min:
+            # 解除タイマーセット
+            # interval = 10  # DEBUG
+            interval = interval_min * 60  # sec
+            timer = MuteWordUnmuteTimer(mw, muter, interval, mute_word_str)
+            timer.start()
 
+        # DB追加
+        unmuted_at = get_future_datetime(interval_min * 60)
+        record = MuteWord(mute_word_str, "muted", now(), now(), unmuted_at)
+        mw.mute_word_db.upsert(record)
+
+        # UI表示更新
         update_mute_word_table(mw.window, mw.mute_word_db)
         return
 
