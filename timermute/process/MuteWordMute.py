@@ -20,7 +20,9 @@ class MuteWordMute(Base):
 
     def run(self, mw: MainWindowInfo) -> None:
         # "-MUTE_WORD_MUTE-"
+        logger.info("MUTE_WORD_MUTE -> start")
         # 選択ミュートワードを取得
+        logger.info("Getting selected mute word -> start")
         index_list = mw.values["-LIST_1-"]
         mute_word_list_all = mw.window["-LIST_1-"].get()
         mute_word_list = []
@@ -28,20 +30,28 @@ class MuteWordMute(Base):
             if i in index_list:
                 mute_word_list.append(mute_word)
         if not mute_word_list:
+            logger.info("Selected mute word is empty.")
+            logger.info("Getting selected mute word -> done")
+            logger.info("MUTE_WORD_MUTE -> done")
             return
+        logger.info("Getting selected mute word -> start")
 
         try:
             # Muter インスタンスを作成し、選択ワードをミュートする
+            logger.info("Mute by mute_keyword -> start")
             config = mw.config
             screen_name = config["twitter"]["screen_name"]
             muter = Muter(screen_name)
             for mute_word in mute_word_list:
                 # 選択ワードをミュート
                 mute_word_str = mute_word[1]
+                logger.info(f"Target keyword is '{mute_word_str}'.")
                 response = muter.mute_keyword(mute_word_str)
                 print(response)
+                logger.info(f"'{mute_word_str}' is muted.")
                 
                 # 解除タイマー
+                logger.info("Unmute timer set -> start")
                 # interval をユーザーに問い合せる
                 interval_min = popup_get_interval()  # min
                 if interval_min:
@@ -50,15 +60,21 @@ class MuteWordMute(Base):
                     interval = interval_min * 60  # sec
                     timer = MuteWordUnmuteTimer(mw, muter, interval, mute_word_str)
                     timer.start()
+                unmuted_at = get_future_datetime(interval_min * 60)
+                logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_word_str}'.")
+                logger.info("Unmute timer set -> done")
 
                 # DB追加
-                unmuted_at = get_future_datetime(interval_min * 60)
+                logger.info("DB update -> start")
                 mw.mute_word_db.mute(mute_word_str, unmuted_at)
+                logger.info("DB update -> done")
+            logger.info("Mute by mute_keyword -> done")
         except Exception as e:
             raise e
         finally:
             # UI表示更新
             update_mute_word_table(mw.window, mw.mute_word_db)
+        logger.info("MUTE_WORD_MUTE -> done")
         return
 
 

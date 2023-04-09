@@ -33,6 +33,7 @@ class MuteWordAdd(Base):
             muter = Muter(screen_name)
             response = muter.mute_keyword(mute_word_str)
             print(response.text)
+            logger.info(f"'{mute_word_str}' is muted.")
             logger.info("Mute by mute_keyword -> done")
 
             # 解除タイマー

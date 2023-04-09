@@ -162,7 +162,8 @@ class MainWindow():
             [t1, sg.Column(button_list1, vertical_alignment="top"), t2],
             [sg.Text("ミュートアカウント", size=(50, 1))],
             [t3, sg.Column(button_list2, vertical_alignment="top"), t4],
-            [sg.Multiline(key="-OUTPUT-", size=(129, 5), auto_refresh=True, autoscroll=True, reroute_stdout=True, reroute_stderr=True)],
+            [sg.Text("ログ", size=(50, 1))],
+            [sg.Multiline(key="-OUTPUT-", size=(155, 8), auto_refresh=True, autoscroll=True, reroute_stdout=True, reroute_stderr=True)],
         ]
         return layout
 
