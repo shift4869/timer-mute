@@ -23,7 +23,7 @@ class MuteUserDB(Base):
     def upsert(self, record: str | MuteUser):
         if isinstance(record, str):
             screen_name = str(record)
-            record = MuteUser(screen_name, "muted", self.now(), self.now())
+            record = MuteUser(screen_name, "muted", self.now(), self.now(), "")
 
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
@@ -43,6 +43,7 @@ class MuteUserDB(Base):
             p.status = record.status
             p.created_at = record.created_at
             p.updated_at = record.updated_at
+            p.unmuted_at = record.unmuted_at
             res = 1
 
         session.commit()
@@ -62,13 +63,15 @@ class MuteUserDB(Base):
         session.close()
         return res
 
-    def mute(self, key):
+    def mute(self, key, unmuted_at):
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
         res = -1
 
         target = session.query(MuteUser).filter(MuteUser.screen_name == key).first()
         target.status = "muted"
+        target.updated_at = self.now()
+        target.unmuted_at = unmuted_at
         res = 0
 
         session.commit()
@@ -82,6 +85,8 @@ class MuteUserDB(Base):
 
         target = session.query(MuteUser).filter(MuteUser.screen_name == key).first()
         target.status = "unmuted"
+        target.updated_at = self.now()
+        target.unmuted_at = ""
         res = 0
 
         session.commit()

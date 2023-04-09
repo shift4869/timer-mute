@@ -3,7 +3,7 @@ import threading
 from typing import Callable
 
 from timermute.muter.Muter import Muter
-from timermute.ui.GuiFunction import update_mute_word_table
+from timermute.ui.GuiFunction import update_mute_user_table, update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
 
 
@@ -45,10 +45,18 @@ class MuteWordUnmuteTimer(TimerBase):
 
 
 class MuteUserUnmuteTimer(TimerBase):
-    def __init__(self, interval: float, screen_name: str, target_screen_name: str):
-        self.muter = Muter(screen_name)
-        super().__init__(interval, self.muter.unmute_user, (target_screen_name, ))
+    def __init__(self, mw: MainWindowInfo, muter: Muter, interval: float, target_screen_name: str):
+        self.muter = muter
+        self.mw = mw
+        self.screen_name = target_screen_name
+        super().__init__(interval, self.run, ())
         pass
+
+    def run(self):
+        self.muter.unmute_user(self.screen_name)
+        self.mw.mute_user_db.unmute(self.screen_name)
+        update_mute_user_table(self.mw.window, self.mw.mute_user_db)
+        return
 
 
 if __name__ == "__main__":

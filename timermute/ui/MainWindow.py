@@ -11,7 +11,7 @@ import PySimpleGUI as sg
 from timermute.db.MuteUserDB import MuteUserDB
 from timermute.db.MuteWordDB import MuteWordDB
 from timermute.process import MuteUserAdd, MuteUserDel, MuteUserMute, MuteUserUnmute, MuteWordAdd, MuteWordDel, MuteWordMute, MuteWordUnmute
-from timermute.ui.GuiFunction import update_mute_word_table
+from timermute.ui.GuiFunction import update_mute_user_table, update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
 
 
@@ -65,6 +65,7 @@ class MainWindow():
         # window["-WORK_URL-"].bind("<FocusIn>", "+INPUT FOCUS+")
 
         update_mute_word_table(self.window, self.mute_word_db)
+        update_mute_user_table(self.window, self.mute_user_db)
 
     def _make_layout(self):
         table_cols_name = ["No.", "     ミュートワード     ", "     更新日時     ", "     作成日時     "]

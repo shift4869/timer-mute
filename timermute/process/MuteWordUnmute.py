@@ -1,8 +1,6 @@
 # coding: utf-8
 from logging import INFO, getLogger
 
-import PySimpleGUI as sg
-
 from timermute.muter.Muter import Muter
 from timermute.process.Base import Base
 from timermute.ui.GuiFunction import update_mute_word_table

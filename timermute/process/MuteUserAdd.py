@@ -1,11 +1,11 @@
 # coding: utf-8
 from logging import INFO, getLogger
 
-import PySimpleGUI as sg
-
+from timermute.db.Model import MuteUser
 from timermute.muter.Muter import Muter
 from timermute.process.Base import Base
-from timermute.ui.GuiFunction import popup_get_text, update_mute_user_table
+from timermute.timer.Timer import MuteUserUnmuteTimer
+from timermute.ui.GuiFunction import get_future_datetime, now, popup_get_interval, popup_get_text, update_mute_user_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
 
 logger = getLogger(__name__)
@@ -17,20 +17,39 @@ class MuteUserAdd(Base):
         pass
 
     def run(self, mw: MainWindowInfo) -> None:
+        # "-MUTE_USER_ADD-"
+        # ミュートユーザーをユーザーに問い合せる
         mute_user_str = popup_get_text("mute user input.")
         if not mute_user_str:
             return
 
-        # デフォルトでミュートする
-        config = mw.config
-        screen_name = config["twitter"]["screen_name"]
-        muter = Muter(screen_name)
-        response = muter.mute_user(mute_user_str)
-        print(response)
+        try:
+            # デフォルトでミュートする
+            config = mw.config
+            screen_name = config["twitter"]["screen_name"]
+            muter = Muter(screen_name)
+            response = muter.mute_user(mute_user_str)
+            print(response)
 
-        mw.mute_user_db.upsert(mute_user_str)
+            # 解除タイマー
+            # interval をユーザーに問い合せる
+            interval_min = popup_get_interval()  # min
+            if interval_min:
+                # 解除タイマーセット
+                # interval = 10  # DEBUG
+                interval = interval_min * 60  # sec
+                timer = MuteUserUnmuteTimer(mw, muter, interval, mute_user_str)
+                timer.start()
 
-        update_mute_user_table(mw.window, mw.mute_user_db)
+            # DB追加
+            unmuted_at = get_future_datetime(interval_min * 60)
+            record = MuteUser(mute_user_str, "muted", now(), now(), unmuted_at)
+            mw.mute_user_db.upsert(record)
+        except Exception as e:
+            raise e
+        finally:
+            # UI表示更新
+            update_mute_user_table(mw.window, mw.mute_user_db)
         return
 
 
