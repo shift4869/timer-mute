@@ -11,6 +11,7 @@ import PySimpleGUI as sg
 from timermute.db.MuteUserDB import MuteUserDB
 from timermute.db.MuteWordDB import MuteWordDB
 from timermute.process import MuteUserAdd, MuteUserDel, MuteUserMute, MuteUserUnmute, MuteWordAdd, MuteWordDel, MuteWordMute, MuteWordUnmute
+from timermute.process.Base import Base as ProcessBase
 from timermute.ui.GuiFunction import update_mute_user_table, update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
 
@@ -186,7 +187,7 @@ class MainWindow():
                 self.values = values
 
                 try:
-                    pb = self.process_dict.get(event)()
+                    pb: ProcessBase = self.process_dict.get(event)()
 
                     if pb is None or not hasattr(pb, "run"):
                         continue

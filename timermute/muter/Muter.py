@@ -35,11 +35,14 @@ class Muter():
         return self.twitter_session.loop
 
     def get_mute_keyword_list(self) -> Response:
+        logger.info("Getting mute word list all -> start")
         url = "https://twitter.com/i/api/1.1/mutes/keywords/list.json"
         response: Response = self.twitter_session.api_get(url)
+        logger.info("Getting mute word list all -> done")
         return response
 
     def mute_keyword(self, keyword: str) -> Response:
+        logger.info(f"POST mute word mute, target is '{keyword}' -> start")
         url = "https://twitter.com/i/api/1.1/mutes/keywords/create.json"
         payload = {
             "keyword": keyword,
@@ -51,9 +54,11 @@ class Muter():
             url,
             params=payload
         )
+        logger.info(f"POST mute word mute, target is '{keyword}' -> done")
         return response
 
     def unmute_keyword(self, keyword: str) -> Response:
+        logger.info(f"POST muted word unmute, target is '{keyword}' -> start")
         url = "https://twitter.com/i/api/1.1/mutes/keywords/destroy.json"
 
         response = self.get_mute_keyword_list()
@@ -68,9 +73,11 @@ class Muter():
             url,
             params=payload
         )
+        logger.info(f"POST muted word unmute, target is '{keyword}' -> done")
         return response
 
     def mute_user(self, screen_name: str) -> Response:
+        logger.info(f"POST mute user mute, target is '{screen_name}' -> start")
         url = "https://twitter.com/i/api/1.1/mutes/users/create.json"
         payload = {
             "screen_name": screen_name,
@@ -79,9 +86,11 @@ class Muter():
             url,
             params=payload
         )
+        logger.info(f"POST mute user mute, target is '{screen_name}' -> done")
         return response
 
     def unmute_user(self, screen_name: str) -> Response:
+        logger.info(f"POST muted user unmute, target is '{screen_name}' -> start")
         url = "https://twitter.com/i/api/1.1/mutes/users/destroy.json"
         payload = {
             "screen_name": screen_name,
@@ -90,6 +99,7 @@ class Muter():
             url,
             params=payload
         )
+        logger.info(f"POST muted user unmute, target is '{screen_name}' -> done")
         return response
 
 

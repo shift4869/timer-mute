@@ -18,20 +18,25 @@ class MuteWordAdd(Base):
 
     def run(self, mw: MainWindowInfo) -> None:
         # "-MUTE_WORD_ADD-"
+        logger.info("MUTE_WORD_ADD -> start")
         # ミュートワードをユーザーに問い合せる
-        mute_word_str = popup_get_text("mute word input.")
+        mute_word_str = popup_get_text("Mute word input.")
         if not mute_word_str:
             return
 
         try:
             # デフォルトでミュートする
+            logger.info("Mute by mute_keyword -> start")
+            logger.info(f"Target keyword is '{mute_word_str}'.")
             config = mw.config
             screen_name = config["twitter"]["screen_name"]
             muter = Muter(screen_name)
             response = muter.mute_keyword(mute_word_str)
-            print(response)
+            print(response.text)
+            logger.info("Mute by mute_keyword -> done")
 
             # 解除タイマー
+            logger.info("Unmute timer set -> start")
             # interval をユーザーに問い合せる
             interval_min = popup_get_interval()  # min
             if interval_min:
@@ -40,16 +45,21 @@ class MuteWordAdd(Base):
                 interval = interval_min * 60  # sec
                 timer = MuteWordUnmuteTimer(mw, muter, interval, mute_word_str)
                 timer.start()
+            unmuted_at = get_future_datetime(interval_min * 60)
+            logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_word_str}'.")
+            logger.info("Unmute timer set -> done")
 
             # DB追加
-            unmuted_at = get_future_datetime(interval_min * 60)
+            logger.info("DB upsert -> start")
             record = MuteWord(mute_word_str, "muted", now(), now(), unmuted_at)
             mw.mute_word_db.upsert(record)
+            logger.info("DB upsert -> done")
         except Exception as e:
             raise e
         finally:
             # UI表示更新
             update_mute_word_table(mw.window, mw.mute_word_db)
+        logger.info("MUTE_WORD_ADD -> done")
         return
 
 

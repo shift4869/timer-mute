@@ -406,19 +406,27 @@ class TwitterSession():
     @classmethod
     def create(cls, screen_name) -> Self:
         # シングルトン
+        logger.info("Getting Twitter session -> start")
         if hasattr(cls, "_twittersession"):
+            logger.info("Already authorized.")
+            logger.info("Getting Twitter session -> done")
             return cls._twittersession
+
+        logger.info("First creation ...")
 
         # 以前に接続した時のクッキーとローカルストレージのファイルが存在しているならば
         RETRY_NUM = 5
         for i in range(RETRY_NUM):
             try:
+                logger.info("Try to Twitter authorize by previous (bearer_token, cookies, local_storage) -> start")
                 bearer_token = BearerToken.create()
                 cookies = Cookies.create()
                 local_storage = LocalStorage.create()
                 twitter_session = TwitterSession(screen_name, bearer_token, cookies, local_storage)
-                logger.info("Getting Twitter session -> done")
+                logger.info("Try to Twitter authorize by previous (bearer_token, cookies, local_storage) -> done")
+
                 cls._twittersession = twitter_session
+                logger.info("Getting Twitter session -> done")
                 return twitter_session
             except FileNotFoundError as e:
                 logger.info(f"No exist Cookies and LocalStorage file.")
@@ -432,6 +440,7 @@ class TwitterSession():
         # クッキーとローカルストレージのファイルがない場合
         # または有効なセッションが取得できなかった場合
         # 認証してクッキーとローカルストレージの取得を試みる
+        logger.info("Try to Twitter authorize -> start")
         loop = asyncio.new_event_loop()
         token_tuple = loop.run_until_complete(
             TwitterSession.get_authorized_token()
@@ -439,8 +448,10 @@ class TwitterSession():
         bearer_token, cookies, local_storage = token_tuple
         loop.close()
         twitter_session = TwitterSession(screen_name, bearer_token, cookies, local_storage)
-        logger.info("Getting Twitter session -> done")
+        logger.info("Try to Twitter authorize -> done")
+
         cls._twittersession = twitter_session
+        logger.info("Getting Twitter session -> done")
         return twitter_session
 
 
