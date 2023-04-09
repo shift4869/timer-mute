@@ -63,7 +63,7 @@ class MuteWordDB(Base):
         session.close()
         return res
 
-    def mute(self, key):
+    def mute(self, key, unmuted_at):
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
         res = -1
@@ -71,6 +71,7 @@ class MuteWordDB(Base):
         target = session.query(MuteWord).filter(MuteWord.keyword == key).first()
         target.status = "muted"
         target.updated_at = self.now()
+        target.unmuted_at = unmuted_at
         res = 0
 
         session.commit()
@@ -85,6 +86,7 @@ class MuteWordDB(Base):
         target = session.query(MuteWord).filter(MuteWord.keyword == key).first()
         target.status = "unmuted"
         target.updated_at = self.now()
+        target.unmuted_at = ""
         res = 0
 
         session.commit()

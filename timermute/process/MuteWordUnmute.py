@@ -18,6 +18,7 @@ class MuteWordUnmute(Base):
 
     def run(self, mw: MainWindowInfo) -> None:
         # "-MUTE_WORD_UNMUTE-"
+        # 選択ミュート済ワードを取得
         index_list = mw.values["-LIST_2-"]
         mute_word_list_all = mw.window["-LIST_2-"].get()
         mute_word_list = []
@@ -27,16 +28,24 @@ class MuteWordUnmute(Base):
         if not mute_word_list:
             return
 
-        config = mw.config
-        screen_name = config["twitter"]["screen_name"]
-        muter = Muter(screen_name)
-        for mute_word in mute_word_list:
-            mute_word_str = mute_word[1]
-            response = muter.unmute_keyword(mute_word_str)
-            print(response)
-            mw.mute_word_db.unmute(mute_word_str)
+        try:
+            # Muter インスタンスを作成し、選択ワードのミュートを解除する
+            config = mw.config
+            screen_name = config["twitter"]["screen_name"]
+            muter = Muter(screen_name)
+            for mute_word in mute_word_list:
+                # 選択ワードのミュートを解除
+                mute_word_str = mute_word[1]
+                response = muter.unmute_keyword(mute_word_str)
+                print(response)
 
-        update_mute_word_table(mw.window, mw.mute_word_db)
+                # DB修正
+                mw.mute_word_db.unmute(mute_word_str)
+        except Exception as e:
+            raise e
+        finally:
+            # UI表示更新
+            update_mute_word_table(mw.window, mw.mute_word_db)
         return
 
 
