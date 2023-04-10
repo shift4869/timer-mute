@@ -56,6 +56,7 @@ def popup_get_interval(message="", title=None, default_text='', password_char=''
     message = message or "At what time will it be unmuted?"
     combo_list = ["minutes later", "hours later", "days later", "weeks later", "months later", "years later"]
     radio_column_layout = sg.Column([
+        [sg.Radio("no limit", 1, key="-R0-")],
         [sg.Radio("1 hours", 1, key="-R1-")],
         [sg.Radio("2 hours", 1, key="-R2-")],
         [sg.Radio("6 hours", 1, key="-R3-")],
@@ -89,12 +90,14 @@ def popup_get_interval(message="", title=None, default_text='', password_char=''
     radio_button_value = [
         1, 2, 6, 12, 24
     ]
+    if values.get("-R0-", False):
+        return None
     if any(radio_button_select_list):
         for i, v in enumerate(radio_button_select_list):
             if v:
                 interval_minutes = radio_button_value[i] * 60  # min
                 return interval_minutes
-    else:
+    if values.get("-R6-", "") != "" and values.get("-R7-", "") in combo_list:
         interval_str = values.get("-R6-", "")
         unit = values.get("-R7-", "")
         if not (interval_str and unit):
@@ -109,10 +112,12 @@ def popup_get_interval(message="", title=None, default_text='', password_char=''
                 interval_minutes = interval_num * 60  # min
             case "days later":
                 interval_minutes = interval_num * 60 * 24  # min
+            case "weeks later":
+                interval_minutes = interval_num * 60 * 24 * 7  # min
             case "months later":
-                interval_minutes = interval_num * 60 * 24 * 7 * 31  # min
+                interval_minutes = interval_num * 60 * 24 * 31  # min
             case "years later":
-                interval_minutes = interval_num * 60 * 24 * 7 * 31 * 365  # min
+                interval_minutes = interval_num * 60 * 24 * 31 * 12  # min
             case _:
                 return None
         return interval_minutes
