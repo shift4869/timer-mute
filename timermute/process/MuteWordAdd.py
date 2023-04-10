@@ -37,18 +37,19 @@ class MuteWordAdd(Base):
             logger.info("Mute by mute_keyword -> done")
 
             # 解除タイマー
-            logger.info("Unmute timer set -> start")
             # interval をユーザーに問い合せる
             interval_min = popup_get_interval()  # min
+            unmuted_at = get_future_datetime(interval_min * 60) if interval_min else ""
             if interval_min:
+                logger.info("Unmute timer set -> start")
                 # 解除タイマーセット
                 # interval = 10  # DEBUG
                 interval = interval_min * 60  # sec
                 timer = MuteWordUnmuteTimer(mw, muter, interval, mute_word_str)
                 timer.start()
-            unmuted_at = get_future_datetime(interval_min * 60)
-            logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_word_str}'.")
-            logger.info("Unmute timer set -> done")
+
+                logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_word_str}'.")
+                logger.info("Unmute timer set -> done")
 
             # DB追加
             logger.info("DB upsert -> start")

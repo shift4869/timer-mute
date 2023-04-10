@@ -41,6 +41,7 @@ class MuteUserMute(Base):
                 # 解除タイマー
                 # interval をユーザーに問い合せる
                 interval_min = popup_get_interval()  # min
+                unmuted_at = get_future_datetime(interval_min * 60) if interval_min else ""
                 if interval_min:
                     # 解除タイマーセット
                     # interval = 10  # DEBUG
@@ -49,7 +50,6 @@ class MuteUserMute(Base):
                     timer.start()
 
                 # DB追加
-                unmuted_at = get_future_datetime(interval_min * 60)
                 mw.mute_user_db.mute(mute_user_str, unmuted_at)
         except Exception as e:
             raise e
