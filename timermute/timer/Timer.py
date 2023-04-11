@@ -1,10 +1,14 @@
 # coding: utf-8
 import threading
+from logging import INFO, getLogger
 from typing import Callable
 
 from timermute.muter.Muter import Muter
 from timermute.ui.GuiFunction import update_mute_user_table, update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
+
+logger = getLogger(__name__)
+logger.setLevel(INFO)
 
 
 class TimerBase():
@@ -25,8 +29,10 @@ class TimerBase():
         self._thread.setDaemon(True)
         pass
 
-    def start(self):
+    def start(self) -> threading.Thread:
+        logger.info(f"Unmute Timer set.")
         self._thread.start()
+        return self._thread
 
 
 class MuteWordUnmuteTimer(TimerBase):
@@ -38,9 +44,24 @@ class MuteWordUnmuteTimer(TimerBase):
         pass
 
     def run(self):
-        self.muter.unmute_keyword(self.keyword)
-        self.mw.mute_word_db.unmute(self.keyword)
+        logger.info("Timer run -> start")
+        try:
+            logger.info("Unmute keyword -> start")
+            logger.info(f"Target keyword is '{self.keyword}'.")
+            self.muter.unmute_keyword(self.keyword)
+            logger.info("Unmute keyword -> done")
+        except Exception as e:
+            logger.warning(e)
+            pass
+        try:
+            logger.info("DB update -> start")
+            self.mw.mute_word_db.unmute(self.keyword)
+            logger.info("DB update -> done")
+        except Exception as e:
+            logger.warning(e)
+            pass
         update_mute_word_table(self.mw.window, self.mw.mute_word_db)
+        logger.info("Timer run -> done")
         return
 
 
@@ -53,9 +74,24 @@ class MuteUserUnmuteTimer(TimerBase):
         pass
 
     def run(self):
-        self.muter.unmute_user(self.screen_name)
-        self.mw.mute_user_db.unmute(self.screen_name)
+        logger.info("Timer run -> start")
+        try:
+            logger.info("Unmute user -> start")
+            logger.info(f"Target user is '{self.screen_name}'.")
+            self.muter.unmute_user(self.screen_name)
+            logger.info("Unmute user -> done")
+        except Exception as e:
+            logger.warning(e)
+            pass
+        try:
+            logger.info("DB update -> start")
+            self.mw.mute_user_db.unmute(self.screen_name)
+            logger.info("DB update -> done")
+        except Exception as e:
+            logger.warning(e)
+            pass
         update_mute_user_table(self.mw.window, self.mw.mute_user_db)
+        logger.info("Timer run -> done")
         return
 
 

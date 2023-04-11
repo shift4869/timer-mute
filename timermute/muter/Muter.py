@@ -63,7 +63,12 @@ class Muter():
 
         response = self.get_mute_keyword_list()
         r_dict: dict = json.loads(response.text)
-        target_keyword_dict: dict = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == keyword][0]
+        target_keyword_dict_list: list[dict] = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == keyword]
+        if not target_keyword_dict_list:
+            raise ValueError("Target muted word is not found.")
+        elif len(target_keyword_dict_list) != 1:
+            raise ValueError("Target muted word is multiple found.")
+        target_keyword_dict = target_keyword_dict_list[0]
         unmute_keyword_id = target_keyword_dict.get("id")
 
         payload = {

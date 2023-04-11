@@ -156,8 +156,10 @@ class MainWindow():
             [sg.Button("<- OFF <-", key="-MUTE_USER_UNMUTE-")],
         ]
 
+        screen_name = self.config["twitter"]["screen_name"]
         layout = [
             [sg.Text("TimerMute")],
+            [sg.Text("操作アカウント", size=(15, 1)), sg.Input(screen_name, size=(50, 1), readonly=True)],
             [sg.Text("ミュートワード", size=(50, 1))],
             [t1, sg.Column(button_list1, vertical_alignment="top"), t2],
             [sg.Text("ミュートアカウント", size=(50, 1))],

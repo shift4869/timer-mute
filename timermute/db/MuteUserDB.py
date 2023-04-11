@@ -53,42 +53,36 @@ class MuteUserDB(Base):
     def delete(self, key):
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
-        res = -1
 
-        target = session.query(MuteUser).filter(MuteUser.screen_name == key).first()
+        target = session.query(MuteUser).filter(MuteUser.screen_name == key).one()
         session.delete(target)
-        res = 0
 
         session.commit()
         session.close()
-        return res
+        return
 
     def mute(self, key, unmuted_at):
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
-        res = -1
 
-        target = session.query(MuteUser).filter(MuteUser.screen_name == key).first()
+        target = session.query(MuteUser).filter(MuteUser.screen_name == key).one()
         target.status = "muted"
         target.updated_at = self.now()
         target.unmuted_at = unmuted_at
-        res = 0
 
         session.commit()
         session.close()
-        return res
+        return
 
     def unmute(self, key):
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
-        res = -1
 
-        target = session.query(MuteUser).filter(MuteUser.screen_name == key).first()
+        target = session.query(MuteUser).filter(MuteUser.screen_name == key).one()
         target.status = "unmuted"
         target.updated_at = self.now()
         target.unmuted_at = ""
-        res = 0
 
         session.commit()
         session.close()
-        return res
+        return
