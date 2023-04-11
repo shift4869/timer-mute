@@ -56,13 +56,13 @@ class MainWindow():
         layout = self._make_layout()
 
         # アイコン画像取得
-        # ICON_PATH = "./image/icon.png"
-        # icon_binary = None
-        # with Path(ICON_PATH).open("rb") as fin:
-        #     icon_binary = fin.read()
+        ICON_PATH = "./image/icon.png"
+        icon_binary = None
+        with Path(ICON_PATH).open("rb") as fin:
+            icon_binary = fin.read()
 
         # ウィンドウオブジェクトの作成
-        self.window = sg.Window("TimerMute", layout, icon=None, size=(1220, 900), finalize=True)
+        self.window = sg.Window("TimerMute", layout, icon=icon_binary, size=(1220, 900), finalize=True)
         # window["-WORK_URL-"].bind("<FocusIn>", "+INPUT FOCUS+")
 
         update_mute_word_table(self.window, self.mute_word_db)
