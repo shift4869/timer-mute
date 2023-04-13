@@ -10,10 +10,12 @@ import PySimpleGUI as sg
 
 from timermute.db.MuteUserDB import MuteUserDB
 from timermute.db.MuteWordDB import MuteWordDB
+from timermute.muter.Muter import Muter
 from timermute.process import MuteUserAdd, MuteUserDel, MuteUserMute, MuteUserUnmute, MuteWordAdd, MuteWordDel, MuteWordMute, MuteWordUnmute
 from timermute.process.Base import Base as ProcessBase
 from timermute.ui.GuiFunction import update_mute_user_table, update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
+from timermute.timer.Restore import MuteUserRestoreTimer
 
 
 class MainWindow():
@@ -45,13 +47,6 @@ class MainWindow():
         if not self.config.read(CONFIG_FILE_NAME, encoding="utf8"):
             raise IOError
 
-        save_base_path = Path(__file__).parent
-        try:
-            save_base_path = Path(self.config["save_base_path"]["save_base_path"])
-        except Exception:
-            save_base_path = Path(__file__).parent
-        save_base_path.mkdir(parents=True, exist_ok=True)
-
         # ウィンドウのレイアウト
         layout = self._make_layout()
 
@@ -65,8 +60,33 @@ class MainWindow():
         self.window = sg.Window("TimerMute", layout, icon=icon_binary, size=(1220, 900), finalize=True)
         # window["-WORK_URL-"].bind("<FocusIn>", "+INPUT FOCUS+")
 
+        # ロード時にセッションを取得する設定の場合、取得する
+        if self.config["on_load"].getboolean("prepare_session"):
+            # シングルトンのため、ここでインスタンス生成しておけば以降はそのインスタンスを使い回せる
+            screen_name = self.config["twitter"]["screen_name"]
+            muter = Muter(screen_name)
+            # muter.twitter_session.prepare()
+
+        # ロード時にタイマーを復元する設定の場合は復元する
+        if self.config["on_load"].getboolean("restore_timer"):
+            main_window_info = self.get_main_window_info()
+            # restore_mute_word_timer(main_window_info)
+            MuteUserRestoreTimer.set(main_window_info)
+            pass
+
+        # UI表示更新
         update_mute_word_table(self.window, self.mute_word_db)
         update_mute_user_table(self.window, self.mute_user_db)
+
+    def get_main_window_info(self) -> MainWindowInfo:
+        main_window_info = MainWindowInfo(
+            self.window,
+            self.values,
+            self.mute_word_db,
+            self.mute_user_db,
+            self.config,
+        )
+        return main_window_info
 
     def _make_layout(self):
         table_cols_name = ["No.", "     ミュートワード     ", "     更新日時     ", "     作成日時     "]
@@ -195,13 +215,7 @@ class MainWindow():
                     if pb is None or not hasattr(pb, "run"):
                         continue
 
-                    main_window_info = MainWindowInfo(
-                        self.window,
-                        self.values,
-                        self.mute_word_db,
-                        self.mute_user_db,
-                        self.config,
-                    )
+                    main_window_info = self.get_main_window_info()
                     pb.run(main_window_info)
                 except Exception as e:
                     logger.error(e)
