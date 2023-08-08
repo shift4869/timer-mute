@@ -1,68 +1,73 @@
 # coding: utf-8
-import json
+import configparser
 import pprint
 from logging import INFO, getLogger
 from pathlib import Path
 from time import sleep
 
 from requests.models import Response
-
-from timermute.muter.TwitterSession import TwitterSession
+from twitter.account import Account
+from twitter.util import *
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
 class Muter():
-    screen_name: str
-    twitter_session: TwitterSession
-    redirect_urls: list[str]
-    content_list: list[str]
+    ct0: str
+    auth_token: str
+    target_screen_name: str
+    target_id: int
+    account: Account
 
-    def __init__(self, screen_name) -> None:
-        self.screen_name = screen_name
-        self.twitter_session = TwitterSession.create(self.screen_name)
-        self.redirect_urls = []
-        self.content_list = []
+    def __init__(self, config: configparser.ConfigParser) -> None:
+        if not isinstance(config, configparser.ConfigParser):
+            raise TypeError("config args must be configparser.ConfigParser.")
+        if not hasattr(self, "account"):
+            twitter_api_client_config = config["twitter_api_client"]
+            self.ct0 = twitter_api_client_config["ct0"]
+            self.auth_token = twitter_api_client_config["auth_token"]
+            self.target_screen_name = twitter_api_client_config["target_screen_name"]
+            self.target_id = int(twitter_api_client_config["target_id"])
+            self.account = Account(cookies={"ct0": self.ct0, "auth_token": self.auth_token}, pbar=False)
+
+    def __new__(cls, *args, **kargs):
+        if not hasattr(cls, "_instance"):
+            cls._instance = super(Muter, cls).__new__(cls)
+        return cls._instance
 
     @property
     def cache_path(self) -> Path:
         # キャッシュファイルパス
         return Path(__file__).parent / f"cache/"
 
-    @property
-    def loop(self):
-        return self.twitter_session.loop
-
-    def get_mute_keyword_list(self) -> Response:
+    def get_mute_keyword_list(self) -> dict:
         logger.info("Getting mute word list all -> start")
-        url = "https://twitter.com/i/api/1.1/mutes/keywords/list.json"
-        response: Response = self.twitter_session.api_get(url)
+        path = "mutes/keywords/list.json"
+        params = {}
+        headers = get_headers(self.account.session)
+        r: Response = self.account.session.get(f"{self.account.v1_api}/{path}", headers=headers, params=params)
+        result: dict = r.json()
         logger.info("Getting mute word list all -> done")
-        return response
+        return result
 
-    def mute_keyword(self, keyword: str) -> Response:
+    def mute_keyword(self, keyword: str) -> dict:
         logger.info(f"POST mute word mute, target is '{keyword}' -> start")
-        url = "https://twitter.com/i/api/1.1/mutes/keywords/create.json"
+        path = "mutes/keywords/create.json"
         payload = {
             "keyword": keyword,
             "mute_surfaces": "notifications,home_timeline,tweet_replies",
             "mute_option": "",
             "duration": "",
         }
-        response: Response = self.twitter_session.api_post(
-            url,
-            params=payload
-        )
+        result = self.account.v1(path, payload)
         logger.info(f"POST mute word mute, target is '{keyword}' -> done")
-        return response
+        return result
 
-    def unmute_keyword(self, keyword: str) -> Response:
+    def unmute_keyword(self, keyword: str) -> dict:
         logger.info(f"POST muted word unmute, target is '{keyword}' -> start")
-        url = "https://twitter.com/i/api/1.1/mutes/keywords/destroy.json"
 
-        response = self.get_mute_keyword_list()
-        r_dict: dict = json.loads(response.text)
+        r_dict: dict = self.get_mute_keyword_list()
         target_keyword_dict_list: list[dict] = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == keyword]
         if not target_keyword_dict_list:
             raise ValueError("Target muted word is not found.")
@@ -71,45 +76,36 @@ class Muter():
         target_keyword_dict = target_keyword_dict_list[0]
         unmute_keyword_id = target_keyword_dict.get("id")
 
+        path = "mutes/keywords/destroy.json"
         payload = {
             "ids": unmute_keyword_id,
         }
-        response: Response = self.twitter_session.api_post(
-            url,
-            params=payload
-        )
+        result = self.account.v1(path, payload)
         logger.info(f"POST muted word unmute, target is '{keyword}' -> done")
-        return response
+        return result
 
-    def mute_user(self, screen_name: str) -> Response:
+    def mute_user(self, screen_name: str) -> dict:
         logger.info(f"POST mute user mute, target is '{screen_name}' -> start")
-        url = "https://twitter.com/i/api/1.1/mutes/users/create.json"
+        path = "mutes/users/create.json"
         payload = {
             "screen_name": screen_name,
         }
-        response: Response = self.twitter_session.api_post(
-            url,
-            params=payload
-        )
+        result = self.account.v1(path, payload)
         logger.info(f"POST mute user mute, target is '{screen_name}' -> done")
-        return response
+        return result
 
-    def unmute_user(self, screen_name: str) -> Response:
+    def unmute_user(self, screen_name: str) -> dict:
         logger.info(f"POST muted user unmute, target is '{screen_name}' -> start")
-        url = "https://twitter.com/i/api/1.1/mutes/users/destroy.json"
+        path = "mutes/users/destroy.json"
         payload = {
             "screen_name": screen_name,
         }
-        response: Response = self.twitter_session.api_post(
-            url,
-            params=payload
-        )
+        result = self.account.v1(path, payload)
         logger.info(f"POST muted user unmute, target is '{screen_name}' -> done")
-        return response
+        return result
 
 
 if __name__ == "__main__":
-    import configparser
     import logging.config
 
     logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
@@ -118,26 +114,29 @@ if __name__ == "__main__":
     if not config.read(CONFIG_FILE_NAME, encoding="utf8"):
         raise IOError
 
-    screen_name = config["twitter"]["screen_name"]
-    muter = Muter(screen_name)
+    # ct0 = config["twitter_api_client"]["ct0"]
+    # auth_token = config["twitter_api_client"]["auth_token"]
+    # target_screen_name = config["twitter_api_client"]["target_screen_name"]
+    # target_id = config["twitter_api_client"]["target_id"]
+    muter = Muter(config)
 
-    # response = muter.mute_user("_shift4869")
-    # pprint.pprint(response.text)
-    # sleep(10)
-    # response = muter.unmute_user("_shift4869")
-    # pprint.pprint(response.text)
-
-    # response = muter.mute_keyword("てすと")
-    # pprint.pprint(response.text)
-    response = muter.get_mute_keyword_list()
-    r_dict: dict = json.loads(response.text)
+    r_dict = muter.get_mute_keyword_list()
     pprint.pprint(r_dict)
-    sleep(10)
-    # target_keyword_dict: dict = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == "てすと"][0]
-    # unmute_keyword_id = target_keyword_dict.get("id")
-    # response = muter.unmute_keyword("てすと")
-    # pprint.pprint(response.text)
 
-    response = muter.get_mute_keyword_list()
-    r_dict: dict = json.loads(response.text)
+    r_dict = muter.mute_keyword("てすと")
+    pprint.pprint(r_dict)
+    r_dict = muter.get_mute_keyword_list()
+    pprint.pprint(r_dict)
+    sleep(1)
+
+    target_keyword_dict: dict = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == "てすと"][0]
+    unmute_keyword_id = target_keyword_dict.get("id")
+    r_dict = muter.unmute_keyword("てすと")
+    pprint.pprint(r_dict)
+
+    r_dict = muter.mute_user("SplatoonJP")
+    pprint.pprint(r_dict)
+    sleep(1)
+
+    r_dict = muter.unmute_user("SplatoonJP")
     pprint.pprint(r_dict)
