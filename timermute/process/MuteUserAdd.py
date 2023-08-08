@@ -29,10 +29,9 @@ class MuteUserAdd(Base):
             logger.info("Mute by mute_user -> start")
             logger.info(f"Target user is '{mute_user_str}'.")
             config = mw.config
-            screen_name = config["twitter"]["screen_name"]
-            muter = Muter(screen_name)
-            response = muter.mute_user(mute_user_str)
-            print(response.text)
+            muter = Muter(config)
+            r_dict = muter.mute_user(mute_user_str)
+            print(r_dict)
             logger.info(f"'{mute_user_str}' is muted.")
             logger.info("Mute by mute_user -> done")
 

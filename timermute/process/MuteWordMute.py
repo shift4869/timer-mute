@@ -40,14 +40,13 @@ class MuteWordMute(Base):
             # Muter インスタンスを作成し、選択ワードをミュートする
             logger.info("Mute by mute_keyword -> start")
             config = mw.config
-            screen_name = config["twitter"]["screen_name"]
-            muter = Muter(screen_name)
+            muter = Muter(config)
             for mute_word in mute_word_list:
                 # 選択ワードをミュート
                 mute_word_str = mute_word[1]
                 logger.info(f"Target keyword is '{mute_word_str}'.")
-                response = muter.mute_keyword(mute_word_str)
-                print(response)
+                r_dict = muter.mute_keyword(mute_word_str)
+                print(r_dict)
                 logger.info(f"'{mute_word_str}' is muted.")
                 
                 # 解除タイマー

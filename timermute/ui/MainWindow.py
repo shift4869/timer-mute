@@ -63,8 +63,7 @@ class MainWindow():
         # ロード時にセッションを取得する設定の場合、取得する
         if self.config["on_load"].getboolean("prepare_session"):
             # シングルトンのため、ここでインスタンス生成しておけば以降はそのインスタンスを使い回せる
-            screen_name = self.config["twitter"]["screen_name"]
-            muter = Muter(screen_name)
+            muter = Muter(self.config)
             # muter.twitter_session.prepare()
 
         # ロード時にタイマーを復元する設定の場合は復元する

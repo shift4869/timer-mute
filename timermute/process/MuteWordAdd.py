@@ -29,10 +29,9 @@ class MuteWordAdd(Base):
             logger.info("Mute by mute_keyword -> start")
             logger.info(f"Target keyword is '{mute_word_str}'.")
             config = mw.config
-            screen_name = config["twitter"]["screen_name"]
-            muter = Muter(screen_name)
-            response = muter.mute_keyword(mute_word_str)
-            print(response.text)
+            muter = Muter(config)
+            r_dict = muter.mute_keyword(mute_word_str)
+            print(r_dict)
             logger.info(f"'{mute_word_str}' is muted.")
             logger.info("Mute by mute_keyword -> done")
 

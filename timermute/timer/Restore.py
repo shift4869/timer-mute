@@ -27,8 +27,7 @@ class MuteWordRestoreTimer(RestoreTimerBase):
 
     @classmethod
     def set(self, main_window_info: MainWindowInfo):
-        screen_name = main_window_info.config["twitter"]["screen_name"]
-        muter = Muter(screen_name)
+        muter = Muter(main_window_info.config)
         mute_word_all = main_window_info.mute_word_db.select()
         mute_word_restore_list = [r for r in mute_word_all if r.status == "muted"]
         destination_format = "%Y-%m-%d %H:%M:%S"
@@ -69,8 +68,7 @@ class MuteUserRestoreTimer(RestoreTimerBase):
 
     @classmethod
     def set(self, main_window_info: MainWindowInfo):
-        screen_name = main_window_info.config["twitter"]["screen_name"]
-        muter = Muter(screen_name)
+        muter = Muter(main_window_info.config)
         mute_user_all = main_window_info.mute_user_db.select()
         mute_user_restore_list = [r for r in mute_user_all if r.status == "muted"]
         destination_format = "%Y-%m-%d %H:%M:%S"

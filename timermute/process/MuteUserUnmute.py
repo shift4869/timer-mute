@@ -36,14 +36,13 @@ class MuteUserUnmute(Base):
             # Muter インスタンスを作成し、選択ユーザーのミュートを解除する
             logger.info("Unmute by unmute_user -> start")
             config = mw.config
-            screen_name = config["twitter"]["screen_name"]
-            muter = Muter(screen_name)
+            muter = Muter(config)
             for mute_user in mute_user_list:
                 # 選択ユーザーのミュートを解除
                 mute_user_str = mute_user[1]
                 logger.info(f"Target user is '{mute_user_str}'.")
-                response = muter.unmute_user(mute_user_str)
-                print(response)
+                r_dict = muter.unmute_user(mute_user_str)
+                print(r_dict)
                 logger.info(f"'{mute_user_str}' is unmuted.")
 
                 # DB修正

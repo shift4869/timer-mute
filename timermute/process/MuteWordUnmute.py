@@ -36,14 +36,13 @@ class MuteWordUnmute(Base):
             # Muter インスタンスを作成し、選択ワードのミュートを解除する
             logger.info("Unmute by unmute_keyword -> start")
             config = mw.config
-            screen_name = config["twitter"]["screen_name"]
-            muter = Muter(screen_name)
+            muter = Muter(config)
             for mute_word in mute_word_list:
                 # 選択ワードのミュートを解除
                 mute_word_str = mute_word[1]
                 logger.info(f"Target keyword is '{mute_word_str}'.")
-                response = muter.unmute_keyword(mute_word_str)
-                print(response)
+                r_dict = muter.unmute_keyword(mute_word_str)
+                print(r_dict)
                 logger.info(f"'{mute_word_str}' is unmuted.")
 
                 # DB修正
