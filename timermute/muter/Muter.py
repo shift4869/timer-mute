@@ -7,7 +7,7 @@ from time import sleep
 
 from requests.models import Response
 from twitter.account import Account
-from twitter.util import *
+from twitter.util import get_headers
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -32,6 +32,7 @@ class Muter():
             self.account = Account(cookies={"ct0": self.ct0, "auth_token": self.auth_token}, pbar=False)
 
     def __new__(cls, *args, **kargs):
+        # シングルトン
         if not hasattr(cls, "_instance"):
             cls._instance = super(Muter, cls).__new__(cls)
         return cls._instance
@@ -39,7 +40,7 @@ class Muter():
     @property
     def cache_path(self) -> Path:
         # キャッシュファイルパス
-        return Path(__file__).parent / f"cache/"
+        return Path(__file__).parent / "cache/"
 
     def get_mute_keyword_list(self) -> dict:
         logger.info("Getting mute word list all -> start")
