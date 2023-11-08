@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, create_engine
+from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.orm import Session, declarative_base
 
 Base = declarative_base()
@@ -25,10 +25,7 @@ class MuteWord(Base):
     updated_at = Column(String(256))
     unmuted_at = Column(String(256))
 
-    def __init__(self, *args, **kwargs):
-        super(Base, self).__init__(*args, **kwargs)
-
-    def __init__(self, keyword, status, created_at, updated_at, unmuted_at):
+    def __init__(self, keyword, status, created_at, updated_at, unmuted_at) -> None:
         # self.id = id
         self.keyword = keyword
         self.status = status
@@ -36,10 +33,10 @@ class MuteWord(Base):
         self.updated_at = updated_at
         self.unmuted_at = unmuted_at
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<MuteWord(id='{}', keyword='{}')>".format(self.id, self.keyword)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return isinstance(other, MuteWord) and other.keyword == self.keyword
 
     def to_dict(self) -> dict:
@@ -106,10 +103,7 @@ class MuteUser(Base):
     updated_at = Column(String(256))
     unmuted_at = Column(String(256))
 
-    def __init__(self, *args, **kwargs):
-        super(Base, self).__init__(*args, **kwargs)
-
-    def __init__(self, screen_name, status, created_at, updated_at, unmuted_at):
+    def __init__(self, screen_name, status, created_at, updated_at, unmuted_at) -> None:
         # self.id = id
         self.screen_name = screen_name
         self.status = status
@@ -117,11 +111,11 @@ class MuteUser(Base):
         self.updated_at = updated_at
         self.unmuted_at = unmuted_at
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<MuteUser(id='{}', screen_name='{}')>".format(self.id, self.screen_name)
 
-    def __eq__(self, other):
-        return isinstance(other, MuteUser) and other.keyword == self.screen_name
+    def __eq__(self, other) -> bool:
+        return isinstance(other, MuteUser) and other.screen_name == self.screen_name
 
     def to_dict(self) -> dict:
         return {
@@ -177,10 +171,10 @@ if __name__ == "__main__":
     session.query(MuteWord).delete()
 
     mute_word_list = [
-        ("test_word_1", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00"),
-        ("test_word_2", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00"),
-        ("test_word_3", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00"),
-        ("test_word_4", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00"),
+        ("test_word_1", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
+        ("test_word_2", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
+        ("test_word_3", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
+        ("test_word_4", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
     ]
 
     for i, data in enumerate(mute_word_list):
@@ -189,7 +183,8 @@ if __name__ == "__main__":
             keyword=data[0],
             status=data[1],
             created_at=data[2],
-            updated_at=data[3]
+            updated_at=data[3],
+            unmuted_at=data[4]
         )
         session.add(mute_word_record)
     session.commit()
@@ -201,10 +196,10 @@ if __name__ == "__main__":
     session.query(MuteUser).delete()
 
     mute_word_list = [
-        ("test_account_1", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00"),
-        ("test_account_2", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00"),
-        ("test_account_3", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00"),
-        ("test_account_4", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00"),
+        ("test_account_1", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
+        ("test_account_2", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
+        ("test_account_3", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
+        ("test_account_4", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
     ]
 
     for i, data in enumerate(mute_word_list):
@@ -213,7 +208,8 @@ if __name__ == "__main__":
             screen_name=data[0],
             status=data[1],
             created_at=data[2],
-            updated_at=data[3]
+            updated_at=data[3],
+            unmuted_at=data[4]
         )
         session.add(mute_word_record)
     session.commit()

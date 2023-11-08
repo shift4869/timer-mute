@@ -1,6 +1,3 @@
-import re
-
-from sqlalchemy import asc, or_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -9,17 +6,17 @@ from timermute.db.Model import MuteUser
 
 
 class MuteUserDB(Base):
-    def __init__(self, db_fullpath: str = "mute.db"):
+    def __init__(self, db_fullpath: str = "mute.db") -> None:
         super().__init__(db_fullpath)
 
-    def select(self):
+    def select(self) -> list[MuteUser]:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
         result = session.query(MuteUser).all()
         session.close()
         return result
 
-    def upsert(self, record: str | MuteUser):
+    def upsert(self, record: str | MuteUser) -> int:
         if isinstance(record, str):
             screen_name = str(record)
             record = MuteUser(screen_name, "muted", self.now(), self.now(), "")
@@ -49,7 +46,7 @@ class MuteUserDB(Base):
         session.close()
         return res
 
-    def delete(self, key):
+    def delete(self, key) -> None:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
@@ -60,7 +57,7 @@ class MuteUserDB(Base):
         session.close()
         return
 
-    def mute(self, key, unmuted_at):
+    def mute(self, key, unmuted_at) -> None:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
@@ -73,7 +70,7 @@ class MuteUserDB(Base):
         session.close()
         return
 
-    def unmute(self, key):
+    def unmute(self, key) -> None:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
