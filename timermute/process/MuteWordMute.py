@@ -6,8 +6,8 @@ from timermute.db.Model import MuteWord
 from timermute.muter.Muter import Muter
 from timermute.process.Base import Base
 from timermute.timer.Timer import MuteWordUnmuteTimer
-from timermute.ui.GuiFunction import get_future_datetime, now, popup_get_interval, update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
+from timermute.ui.Util import get_future_datetime, now, popup_get_interval, update_mute_word_table
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)

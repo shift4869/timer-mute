@@ -3,8 +3,8 @@ from logging import INFO, getLogger
 from timermute.muter.Muter import Muter
 from timermute.process.Base import Base
 from timermute.timer.Timer import MuteUserUnmuteTimer
-from timermute.ui.GuiFunction import get_future_datetime, popup_get_interval, update_mute_user_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
+from timermute.ui.Util import get_future_datetime, popup_get_interval, update_mute_user_table
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)

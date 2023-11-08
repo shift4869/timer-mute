@@ -2,8 +2,8 @@ from logging import INFO, getLogger
 
 from timermute.muter.Muter import Muter
 from timermute.process.Base import Base
-from timermute.ui.GuiFunction import update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
+from timermute.ui.Util import update_mute_word_table
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
