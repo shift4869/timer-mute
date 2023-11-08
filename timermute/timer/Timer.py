@@ -16,7 +16,7 @@ class TimerBase():
     _args: dict
     _thread: threading.Thread
 
-    def __init__(self, interval: float, func: Callable, args: dict):
+    def __init__(self, interval: float, func: Callable, args: dict) -> None:
         self._interval = interval
         self._func = func
         self._args = args
@@ -26,7 +26,6 @@ class TimerBase():
             self._args
         )
         self._thread.setDaemon(True)
-        pass
 
     def start(self) -> threading.Thread:
         logger.info(f"Unmute Timer set.")
@@ -35,14 +34,13 @@ class TimerBase():
 
 
 class MuteWordUnmuteTimer(TimerBase):
-    def __init__(self, mw: MainWindowInfo, muter: Muter, interval: float, target_keyword: str):
+    def __init__(self, mw: MainWindowInfo, muter: Muter, interval: float, target_keyword: str) -> None:
         self.muter = muter
         self.mw = mw
         self.keyword = target_keyword
         super().__init__(interval, self.run, ())
-        pass
 
-    def run(self):
+    def run(self) -> None:
         logger.info("Timer run -> start")
         try:
             logger.info("Unmute keyword -> start")
@@ -61,18 +59,16 @@ class MuteWordUnmuteTimer(TimerBase):
             pass
         update_mute_word_table(self.mw.window, self.mw.mute_word_db)
         logger.info("Timer run -> done")
-        return
 
 
 class MuteUserUnmuteTimer(TimerBase):
-    def __init__(self, mw: MainWindowInfo, muter: Muter, interval: float, target_screen_name: str):
+    def __init__(self, mw: MainWindowInfo, muter: Muter, interval: float, target_screen_name: str) -> None:
         self.muter = muter
         self.mw = mw
         self.screen_name = target_screen_name
         super().__init__(interval, self.run, ())
-        pass
 
-    def run(self):
+    def run(self) -> None:
         logger.info("Timer run -> start")
         try:
             logger.info("Unmute user -> start")
@@ -91,11 +87,9 @@ class MuteUserUnmuteTimer(TimerBase):
             pass
         update_mute_user_table(self.mw.window, self.mw.mute_user_db)
         logger.info("Timer run -> done")
-        return
 
 
 if __name__ == "__main__":
     from timermute.ui.MainWindow import MainWindow
     main_window = MainWindow()
     main_window.run()
-    pass

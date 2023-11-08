@@ -1,7 +1,6 @@
 from datetime import datetime
 from logging import INFO, getLogger
 
-from timermute.db.Model import MuteUser, MuteWord
 from timermute.muter.Muter import Muter
 from timermute.timer.Timer import MuteUserUnmuteTimer, MuteWordUnmuteTimer
 from timermute.ui.MainWindowInfo import MainWindowInfo
@@ -11,21 +10,20 @@ logger.setLevel(INFO)
 
 
 class RestoreTimerBase():
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @classmethod
-    def set(self, main_window_info: MainWindowInfo):
+    def set(self, main_window_info: MainWindowInfo) -> None:
         pass
 
 
 class MuteWordRestoreTimer(RestoreTimerBase):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        pass
 
     @classmethod
-    def set(self, main_window_info: MainWindowInfo):
+    def set(self, main_window_info: MainWindowInfo) -> None:
         muter = Muter(main_window_info.config)
         mute_word_all = main_window_info.mute_word_db.select()
         mute_word_restore_list = [r for r in mute_word_all if r.status == "muted"]
@@ -57,16 +55,14 @@ class MuteWordRestoreTimer(RestoreTimerBase):
                 continue
             timer = MuteWordUnmuteTimer(main_window_info, muter, interval, target_keyword)
             timer.start()
-        pass
 
 
 class MuteUserRestoreTimer(RestoreTimerBase):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        pass
 
     @classmethod
-    def set(self, main_window_info: MainWindowInfo):
+    def set(self, main_window_info: MainWindowInfo) -> None:
         muter = Muter(main_window_info.config)
         mute_user_all = main_window_info.mute_user_db.select()
         mute_user_restore_list = [r for r in mute_user_all if r.status == "muted"]
@@ -98,11 +94,9 @@ class MuteUserRestoreTimer(RestoreTimerBase):
                 continue
             timer = MuteUserUnmuteTimer(main_window_info, muter, interval, target_screen_name)
             timer.start()
-        pass
 
 
 if __name__ == "__main__":
     from timermute.ui.MainWindow import MainWindow
     main_window = MainWindow()
     main_window.run()
-    pass
