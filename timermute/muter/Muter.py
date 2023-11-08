@@ -1,4 +1,3 @@
-# coding: utf-8
 import configparser
 import pprint
 from logging import INFO, getLogger

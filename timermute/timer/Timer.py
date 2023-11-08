@@ -1,4 +1,3 @@
-# coding: utf-8
 import threading
 from logging import INFO, getLogger
 from typing import Callable

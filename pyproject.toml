@@ -20,6 +20,9 @@ twitter-api-client = "^0.10.11"
 multi_line_output = 9
 line_length = 256
 
+[tool.ruff]
+organizeImports = false
+
 [tool.ruff.lint]
 ignore = ["F401", "F541", "F841"]
 

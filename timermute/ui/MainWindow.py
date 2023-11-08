@@ -1,8 +1,6 @@
-# coding: utf-8
 import configparser
 import logging
 import logging.config
-import subprocess
 from logging import INFO, getLogger
 from pathlib import Path
 
@@ -13,9 +11,9 @@ from timermute.db.MuteWordDB import MuteWordDB
 from timermute.muter.Muter import Muter
 from timermute.process import MuteUserAdd, MuteUserDel, MuteUserMute, MuteUserUnmute, MuteWordAdd, MuteWordDel, MuteWordMute, MuteWordUnmute
 from timermute.process.Base import Base as ProcessBase
+from timermute.timer.Restore import MuteUserRestoreTimer
 from timermute.ui.GuiFunction import update_mute_user_table, update_mute_word_table
 from timermute.ui.MainWindowInfo import MainWindowInfo
-from timermute.timer.Restore import MuteUserRestoreTimer
 
 
 class MainWindow():

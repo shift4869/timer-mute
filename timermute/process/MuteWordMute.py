@@ -1,4 +1,3 @@
-# coding: utf-8
 from logging import INFO, getLogger
 
 import PySimpleGUI as sg
