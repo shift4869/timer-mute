@@ -23,7 +23,7 @@ class MainWindow():
     mute_user_db: MuteUserDB
     config: configparser.ConfigParser
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.mute_word_db = MuteWordDB()
         self.mute_user_db = MuteUserDB()
 
@@ -50,9 +50,7 @@ class MainWindow():
 
         # アイコン画像取得
         ICON_PATH = "./image/icon.png"
-        icon_binary = None
-        with Path(ICON_PATH).open("rb") as fin:
-            icon_binary = fin.read()
+        icon_binary = Path(ICON_PATH).read_bytes()
 
         # ウィンドウオブジェクトの作成
         self.window = sg.Window("TimerMute", layout, icon=icon_binary, size=(1220, 900), finalize=True)
@@ -62,12 +60,10 @@ class MainWindow():
         if self.config["on_load"].getboolean("prepare_session"):
             # シングルトンのため、ここでインスタンス生成しておけば以降はそのインスタンスを使い回せる
             muter = Muter(self.config)
-            # muter.twitter_session.prepare()
 
         # ロード時にタイマーを復元する設定の場合は復元する
         if self.config["on_load"].getboolean("restore_timer"):
             main_window_info = self.get_main_window_info()
-            # restore_mute_word_timer(main_window_info)
             MuteUserRestoreTimer.set(main_window_info)
             pass
 
@@ -85,7 +81,7 @@ class MainWindow():
         )
         return main_window_info
 
-    def _make_layout(self):
+    def _make_layout(self) -> list[list]:
         table_cols_name = ["No.", "     ミュートワード     ", "     更新日時     ", "     作成日時     "]
         cols_width = [20, 100, 60, 60]
         def_data = [["", "", "", ""]]
@@ -186,7 +182,7 @@ class MainWindow():
         ]
         return layout
 
-    def run(self):
+    def run(self) -> None:
         logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
         # for name in logging.root.manager.loggerDict:
         #     # 自分以外のすべてのライブラリのログ出力を抑制
@@ -199,7 +195,6 @@ class MainWindow():
 
         while True:
             event, values = self.window.read()
-            # print(f"event={event} values={values}")
             if event in [sg.WIN_CLOSED, "-EXIT-"]:
                 break
 
@@ -220,7 +215,6 @@ class MainWindow():
 
         # ウィンドウ終了処理
         self.window.close()
-        return 0
 
 
 if __name__ == "__main__":
