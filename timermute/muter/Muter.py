@@ -4,7 +4,7 @@ from logging import INFO, getLogger
 from pathlib import Path
 from time import sleep
 
-from requests.models import Response
+from httpx import Response
 from twitter.account import Account
 from twitter.util import get_headers
 

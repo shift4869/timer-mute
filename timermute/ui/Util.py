@@ -101,7 +101,7 @@ def popup_get_interval(message="", title=None, default_text='', password_char=''
         unit = values.get("-R7-", "")
         if not (interval_str and unit):
             return None
-        if not re.search("^[0-9]*$", interval_str):
+        if not re.search(r"^[0-9]*$", interval_str):
             return None
         interval_num = float(interval_str)
         match unit:
