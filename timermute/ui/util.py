@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 
 import PySimpleGUI as sg
 
-from timermute.db.MuteUserDB import MuteUserDB
-from timermute.db.MuteWordDB import MuteWordDB
+from timermute.db.mute_user_db import MuteUserDB
+from timermute.db.mute_word_db import MuteWordDB
 
 
 def now():
@@ -21,21 +21,53 @@ def get_future_datetime(seconds: int) -> str:
     return future_datetime.strftime(destination_format)
 
 
-def popup_get_text(message, title=None, default_text='', password_char='', size=(None, None), button_color=None,
-                   background_color=None, text_color=None, icon=None, font=None, no_titlebar=False,
-                   grab_anywhere=False, keep_on_top=None, location=(None, None), relative_location=(None, None), image=None, modal=True):
+def popup_get_text(
+    message,
+    title=None,
+    default_text="",
+    password_char="",
+    size=(None, None),
+    button_color=None,
+    background_color=None,
+    text_color=None,
+    icon=None,
+    font=None,
+    no_titlebar=False,
+    grab_anywhere=False,
+    keep_on_top=None,
+    location=(None, None),
+    relative_location=(None, None),
+    image=None,
+    modal=True,
+):
     """sg.popup_get_text のラッパー
 
     Notes:
         テキストボックスにデフォルトでフォーカスをセットする
         image はサポートしていないので利用するときは追加すること
     """
-    layout = [[sg.Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)],
-              [sg.Input(default_text=default_text, size=size, key="-INPUT-", password_char=password_char, focus=True)],
-              [sg.Button("Ok", size=(6, 1), bind_return_key=True), sg.Button("Cancel", size=(6, 1))]]
+    layout = [
+        [sg.Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)],
+        [sg.Input(default_text=default_text, size=size, key="-INPUT-", password_char=password_char, focus=True)],
+        [sg.Button("Ok", size=(6, 1), bind_return_key=True), sg.Button("Cancel", size=(6, 1))],
+    ]
 
-    window = sg.Window(title=title or message, layout=layout, icon=icon, auto_size_text=True, button_color=button_color, no_titlebar=no_titlebar,
-                       background_color=background_color, grab_anywhere=grab_anywhere, keep_on_top=keep_on_top, location=location, relative_location=relative_location, finalize=True, modal=modal, font=font)
+    window = sg.Window(
+        title=title or message,
+        layout=layout,
+        icon=icon,
+        auto_size_text=True,
+        button_color=button_color,
+        no_titlebar=no_titlebar,
+        background_color=background_color,
+        grab_anywhere=grab_anywhere,
+        keep_on_top=keep_on_top,
+        location=location,
+        relative_location=relative_location,
+        finalize=True,
+        modal=modal,
+        font=font,
+    )
 
     window["-INPUT-"].set_focus(True)
 
@@ -49,26 +81,56 @@ def popup_get_text(message, title=None, default_text='', password_char='', size=
         return path
 
 
-def popup_get_interval(message="", title=None, default_text='', password_char='', size=(None, None), button_color=None,
-                       background_color=None, text_color=None, icon=None, font=None, no_titlebar=False,
-                       grab_anywhere=False, keep_on_top=None, location=(None, None), relative_location=(None, None), image=None, modal=True) -> int | None:
+def popup_get_interval(
+    message="",
+    title=None,
+    default_text="",
+    password_char="",
+    size=(None, None),
+    button_color=None,
+    background_color=None,
+    text_color=None,
+    icon=None,
+    font=None,
+    no_titlebar=False,
+    grab_anywhere=False,
+    keep_on_top=None,
+    location=(None, None),
+    relative_location=(None, None),
+    image=None,
+    modal=True,
+) -> int | None:
     message = message or "At what time will it be unmuted?"
     combo_list = ["minutes later", "hours later", "days later", "weeks later", "months later", "years later"]
-    radio_column_layout = sg.Column([
-        [sg.Radio("no limit", 1, key="-R0-")],
-        [sg.Radio("1 hours", 1, key="-R1-")],
-        [sg.Radio("2 hours", 1, key="-R2-")],
-        [sg.Radio("6 hours", 1, key="-R3-")],
-        [sg.Radio("12 hours", 1, key="-R4-")],
-        [sg.Radio("24 hours", 1, key="-R5-")],
-        [sg.Input("", key="-R6-", size=(15, 2)), sg.Combo(combo_list, combo_list[1], key="-R7-", size=(10, 2))],
-    ])
-    layout = [[sg.Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)],
-              [radio_column_layout],
-              [sg.Button("Submit", size=(6, 1), bind_return_key=True), sg.Button("Cancel", size=(6, 1))]]
+    radio_column_layout = sg.Column(
+        [
+            [sg.Radio("no limit", 1, key="-R0-")],
+            [sg.Radio("1 hours", 1, key="-R1-")],
+            [sg.Radio("2 hours", 1, key="-R2-")],
+            [sg.Radio("6 hours", 1, key="-R3-")],
+            [sg.Radio("12 hours", 1, key="-R4-")],
+            [sg.Radio("24 hours", 1, key="-R5-")],
+            [sg.Input("", key="-R6-", size=(15, 2)), sg.Combo(combo_list, combo_list[1], key="-R7-", size=(10, 2))],
+        ]
+    )
+    layout = [[sg.Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)], [radio_column_layout], [sg.Button("Submit", size=(6, 1), bind_return_key=True), sg.Button("Cancel", size=(6, 1))]]
 
-    window = sg.Window(title=title or message, layout=layout, icon=icon, auto_size_text=True, button_color=button_color, no_titlebar=no_titlebar,
-                       background_color=background_color, grab_anywhere=grab_anywhere, keep_on_top=keep_on_top, location=location, relative_location=relative_location, finalize=True, modal=modal, font=font)
+    window = sg.Window(
+        title=title or message,
+        layout=layout,
+        icon=icon,
+        auto_size_text=True,
+        button_color=button_color,
+        no_titlebar=no_titlebar,
+        background_color=background_color,
+        grab_anywhere=grab_anywhere,
+        keep_on_top=keep_on_top,
+        location=location,
+        relative_location=relative_location,
+        finalize=True,
+        modal=modal,
+        font=font,
+    )
 
     # window["-INPUT-"].set_focus(True)
 
@@ -86,9 +148,7 @@ def popup_get_interval(message="", title=None, default_text='', password_char=''
         values.get("-R4-", False),
         values.get("-R5-", False),
     ]
-    radio_button_value = [
-        1, 2, 6, 12, 24
-    ]
+    radio_button_value = [1, 2, 6, 12, 24]
     if values.get("-R0-", False):
         return None
     if any(radio_button_select_list):
@@ -124,8 +184,7 @@ def popup_get_interval(message="", title=None, default_text='', password_char=''
 
 
 def update_mute_word_table(window: sg.Window, mute_word_db: MuteWordDB) -> None:
-    """mute_word テーブルを更新する
-    """
+    """mute_word テーブルを更新する"""
     # TODO::index保存
 
     # ミュートワード取得
@@ -157,8 +216,7 @@ def update_mute_word_table(window: sg.Window, mute_word_db: MuteWordDB) -> None:
 
 
 def update_mute_user_table(window: sg.Window, mute_user_db: MuteUserDB) -> None:
-    """mute_user テーブルを更新する
-    """
+    """mute_user テーブルを更新する"""
     # TODO::index保存
 
     # ミュートユーザー取得
@@ -190,6 +248,7 @@ def update_mute_user_table(window: sg.Window, mute_user_db: MuteUserDB) -> None:
 
 
 if __name__ == "__main__":
-    from timermute.ui.MainWindow import MainWindow
+    from timermute.ui.main_window import MainWindow
+
     mw = MainWindow()
     mw.run()

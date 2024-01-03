@@ -7,13 +7,13 @@ Base = declarative_base()
 class MuteWord(Base):
     """ミュートワードモデル
 
-        [id] INTEGER NOT NULL UNIQUE,
-        [keyword] TEXT NOT NULL,
-        [status] TEXT,
-        [created_at] TEXT,
-        [updated_at] TEXT,
-        [unmuted_at] TEXT,
-        PRIMARY KEY([id])
+    [id] INTEGER NOT NULL UNIQUE,
+    [keyword] TEXT NOT NULL,
+    [status] TEXT,
+    [created_at] TEXT,
+    [updated_at] TEXT,
+    [unmuted_at] TEXT,
+    PRIMARY KEY([id])
     """
 
     __tablename__ = "MuteWord"
@@ -85,13 +85,13 @@ class MuteWord(Base):
 class MuteUser(Base):
     """ミュートアカウントモデル
 
-        [id] INTEGER NOT NULL UNIQUE,
-        [screen_name] TEXT NOT NULL,
-        [status] TEXT,
-        [created_at] TEXT,
-        [updated_at] TEXT,
-        [unmuted_at] TEXT,
-        PRIMARY KEY([id])
+    [id] INTEGER NOT NULL UNIQUE,
+    [screen_name] TEXT NOT NULL,
+    [status] TEXT,
+    [created_at] TEXT,
+    [updated_at] TEXT,
+    [unmuted_at] TEXT,
+    PRIMARY KEY([id])
     """
 
     __tablename__ = "MuteUser"
@@ -161,10 +161,7 @@ class MuteUser(Base):
 
 
 if __name__ == "__main__":
-    from sqlalchemy import create_engine
-    from sqlalchemy.orm import Session
-
-    engine = create_engine("sqlite:///test_DB.db", echo=True)
+    engine = create_engine("sqlite:///:memory:", echo=True)
     Base.metadata.create_all(engine)
 
     session = Session(engine)
@@ -184,7 +181,7 @@ if __name__ == "__main__":
             status=data[1],
             created_at=data[2],
             updated_at=data[3],
-            unmuted_at=data[4]
+            unmuted_at=data[4],
         )
         session.add(mute_word_record)
     session.commit()
@@ -209,7 +206,7 @@ if __name__ == "__main__":
             status=data[1],
             created_at=data[2],
             updated_at=data[3],
-            unmuted_at=data[4]
+            unmuted_at=data[4],
         )
         session.add(mute_word_record)
     session.commit()

@@ -5,7 +5,7 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 
-from timermute.db.Model import Base as ModelBase
+from timermute.db.model import Base as ModelBase
 
 
 class Base(metaclass=ABCMeta):
@@ -21,7 +21,7 @@ class Base(metaclass=ABCMeta):
             connect_args={
                 "timeout": 30,
                 "check_same_thread": False,
-            }
+            },
         )
         ModelBase.metadata.create_all(self.engine)
 
@@ -52,7 +52,8 @@ class Base(metaclass=ABCMeta):
 
 
 if __name__ == "__main__":
-    from timermute.db.MuteWordDB import MuteWordDB
+    from timermute.db.mute_word_db import MuteWordDB
+
     db_fullpath = Path("mute.db")
     db_cont = MuteWordDB(db_fullpath=str(db_fullpath))
     pass

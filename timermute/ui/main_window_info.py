@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 import PySimpleGUI as sg
 
-from timermute.db.MuteUserDB import MuteUserDB
-from timermute.db.MuteWordDB import MuteWordDB
+from timermute.db.mute_user_db import MuteUserDB
+from timermute.db.mute_word_db import MuteWordDB
 
 
 @dataclass
-class MainWindowInfo():
+class MainWindowInfo:
     window: sg.Window
     values: dict
     mute_word_db: MuteWordDB

@@ -1,13 +1,10 @@
 from logging import INFO, getLogger
 
-import PySimpleGUI as sg
-
-from timermute.db.Model import MuteWord
-from timermute.muter.Muter import Muter
-from timermute.process.Base import Base
-from timermute.timer.Timer import MuteWordUnmuteTimer
-from timermute.ui.MainWindowInfo import MainWindowInfo
-from timermute.ui.Util import get_future_datetime, now, popup_get_interval, update_mute_word_table
+from timermute.muter.muter import Muter
+from timermute.process.base import Base
+from timermute.timer.timer import MuteWordUnmuteTimer
+from timermute.ui.main_window_info import MainWindowInfo
+from timermute.ui.util import get_future_datetime, popup_get_interval, update_mute_word_table
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -47,7 +44,7 @@ class MuteWordMute(Base):
                 r_dict = muter.mute_keyword(mute_word_str)
                 print(r_dict)
                 logger.info(f"'{mute_word_str}' is muted.")
-                
+
                 # 解除タイマー
                 # interval をユーザーに問い合せる
                 interval_min = popup_get_interval()  # min
@@ -78,7 +75,8 @@ class MuteWordMute(Base):
 
 
 if __name__ == "__main__":
-    from timermute.ui.MainWindow import MainWindow
+    from timermute.ui.main_window import MainWindow
+
     main_window = MainWindow()
     main_window.run()
     pass

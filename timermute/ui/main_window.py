@@ -6,17 +6,17 @@ from pathlib import Path
 
 import PySimpleGUI as sg
 
-from timermute.db.MuteUserDB import MuteUserDB
-from timermute.db.MuteWordDB import MuteWordDB
-from timermute.muter.Muter import Muter
-from timermute.process import MuteUserAdd, MuteUserDel, MuteUserMute, MuteUserUnmute, MuteWordAdd, MuteWordDel, MuteWordMute, MuteWordUnmute
-from timermute.process.Base import Base as ProcessBase
-from timermute.timer.Restore import MuteUserRestoreTimer
-from timermute.ui.MainWindowInfo import MainWindowInfo
-from timermute.ui.Util import update_mute_user_table, update_mute_word_table
+from timermute.db.mute_user_db import MuteUserDB
+from timermute.db.mute_word_db import MuteWordDB
+from timermute.muter.muter import Muter
+from timermute.process import mute_user_add, mute_user_del, mute_user_mute, mute_user_unmute, mute_word_add, mute_word_del, mute_word_mute, mute_word_unmute
+from timermute.process.base import Base as ProcessBase
+from timermute.timer.restore import MuteUserRestoreTimer
+from timermute.ui.main_window_info import MainWindowInfo
+from timermute.ui.util import update_mute_user_table, update_mute_word_table
 
 
-class MainWindow():
+class MainWindow:
     window: sg.Window = None
     values: list = []
     mute_word_db: MuteWordDB
@@ -29,14 +29,14 @@ class MainWindow():
 
         # イベントと処理の辞書
         self.process_dict = {
-            "-MUTE_WORD_ADD-": MuteWordAdd.MuteWordAdd,
-            "-MUTE_WORD_DEL-": MuteWordDel.MuteWordDel,
-            "-MUTE_WORD_MUTE-": MuteWordMute.MuteWordMute,
-            "-MUTE_WORD_UNMUTE-": MuteWordUnmute.MuteWordUnmute,
-            "-MUTE_USER_ADD-": MuteUserAdd.MuteUserAdd,
-            "-MUTE_USER_DEL-": MuteUserDel.MuteUserDel,
-            "-MUTE_USER_MUTE-": MuteUserMute.MuteUserMute,
-            "-MUTE_USER_UNMUTE-": MuteUserUnmute.MuteUserUnmute,
+            "-MUTE_WORD_ADD-": mute_word_add.MuteWordAdd,
+            "-MUTE_WORD_DEL-": mute_word_del.MuteWordDel,
+            "-MUTE_WORD_MUTE-": mute_word_mute.MuteWordMute,
+            "-MUTE_WORD_UNMUTE-": mute_word_unmute.MuteWordUnmute,
+            "-MUTE_USER_ADD-": mute_user_add.MuteUserAdd,
+            "-MUTE_USER_DEL-": mute_user_del.MuteUserDel,
+            "-MUTE_USER_MUTE-": mute_user_mute.MuteUserMute,
+            "-MUTE_USER_UNMUTE-": mute_user_unmute.MuteUserUnmute,
         }
 
         # configファイルロード
@@ -86,10 +86,11 @@ class MainWindow():
         cols_width = [20, 100, 60, 60]
         def_data = [["", "", "", ""]]
         table_right_click_menu = [
-            "-TABLE_RIGHT_CLICK_MENU-", [
+            "-TABLE_RIGHT_CLICK_MENU-",
+            [
                 "! ",
                 "---",
-            ]
+            ],
         ]
         table_style1 = {
             "values": def_data,
@@ -123,10 +124,11 @@ class MainWindow():
         cols_width2 = [20, 100, 60, 60]
         def_data2 = [["", "", "", ""]]
         table_right_click_menu = [
-            "-TABLE_RIGHT_CLICK_MENU-", [
+            "-TABLE_RIGHT_CLICK_MENU-",
+            [
                 "! ",
                 "---",
-            ]
+            ],
         ]
         table_style3 = {
             "values": def_data2,

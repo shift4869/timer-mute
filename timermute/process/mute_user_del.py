@@ -1,8 +1,8 @@
 from logging import INFO, getLogger
 
-from timermute.process.Base import Base
-from timermute.ui.MainWindowInfo import MainWindowInfo
-from timermute.ui.Util import update_mute_user_table
+from timermute.process.base import Base
+from timermute.ui.main_window_info import MainWindowInfo
+from timermute.ui.util import update_mute_user_table
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -48,7 +48,8 @@ class MuteUserDel(Base):
 
 
 if __name__ == "__main__":
-    from timermute.ui.MainWindow import MainWindow
+    from timermute.ui.main_window import MainWindow
+
     main_window = MainWindow()
     main_window.run()
     pass

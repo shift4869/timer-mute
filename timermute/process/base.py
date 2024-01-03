@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from timermute.ui.MainWindowInfo import MainWindowInfo
+from timermute.ui.main_window_info import MainWindowInfo
 
 
 class Base(metaclass=ABCMeta):

@@ -1,15 +1,15 @@
 from datetime import datetime
 from logging import INFO, getLogger
 
-from timermute.muter.Muter import Muter
-from timermute.timer.Timer import MuteUserUnmuteTimer, MuteWordUnmuteTimer
-from timermute.ui.MainWindowInfo import MainWindowInfo
+from timermute.muter.muter import Muter
+from timermute.timer.timer import MuteUserUnmuteTimer, MuteWordUnmuteTimer
+from timermute.ui.main_window_info import MainWindowInfo
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
-class RestoreTimerBase():
+class RestoreTimerBase:
     def __init__(self) -> None:
         pass
 
@@ -97,6 +97,7 @@ class MuteUserRestoreTimer(RestoreTimerBase):
 
 
 if __name__ == "__main__":
-    from timermute.ui.MainWindow import MainWindow
+    from timermute.ui.main_window import MainWindow
+
     main_window = MainWindow()
     main_window.run()

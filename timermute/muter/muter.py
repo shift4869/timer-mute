@@ -12,7 +12,7 @@ logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
-class Muter():
+class Muter:
     ct0: str
     auth_token: str
     target_screen_name: str

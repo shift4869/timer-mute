@@ -2,15 +2,15 @@ import threading
 from logging import INFO, getLogger
 from typing import Callable
 
-from timermute.muter.Muter import Muter
-from timermute.ui.MainWindowInfo import MainWindowInfo
-from timermute.ui.Util import update_mute_user_table, update_mute_word_table
+from timermute.muter.muter import Muter
+from timermute.ui.main_window_info import MainWindowInfo
+from timermute.ui.util import update_mute_user_table, update_mute_word_table
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
-class TimerBase():
+class TimerBase:
     _interval: float
     _func: Callable
     _args: dict
@@ -20,11 +20,7 @@ class TimerBase():
         self._interval = interval
         self._func = func
         self._args = args
-        self._thread = threading.Timer(
-            self._interval,
-            self._func,
-            self._args
-        )
+        self._thread = threading.Timer(self._interval, self._func, self._args)
         self._thread.setDaemon(True)
 
     def start(self) -> threading.Thread:
@@ -90,6 +86,7 @@ class MuteUserUnmuteTimer(TimerBase):
 
 
 if __name__ == "__main__":
-    from timermute.ui.MainWindow import MainWindow
+    from timermute.ui.main_window import MainWindow
+
     main_window = MainWindow()
     main_window.run()
