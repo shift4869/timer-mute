@@ -1,15 +1,18 @@
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
-from pathlib import Path
+from typing import Self
 
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 
 from timermute.db.model import Base as ModelBase
+from timermute.util import Result
 
 
 class Base(metaclass=ABCMeta):
-    def __init__(self, db_fullpath="Mute.db"):
+    def __init__(self, db_fullpath: str = "mute.db") -> None:
+        if not isinstance(db_fullpath, str):
+            raise ValueError("db_fullpath must be str.")
+
         self.dbname = db_fullpath
         self.db_url = f"sqlite:///{self.dbname}"
 
@@ -25,35 +28,30 @@ class Base(metaclass=ABCMeta):
         )
         ModelBase.metadata.create_all(self.engine)
 
-    def now(self):
-        destination_format = "%Y-%m-%d %H:%M:%S"
-        now_datetime = datetime.now()
-        return now_datetime.strftime(destination_format)
+    @abstractmethod
+    def select(self) -> list[Self]:
+        raise NotImplementedError
 
     @abstractmethod
-    def select(self):
-        return []
+    def upsert(self, record: ModelBase) -> Result:
+        raise NotImplementedError
 
     @abstractmethod
-    def upsert(self, record):
-        return []
+    def delete(self, key_screen_name: str) -> Result:
+        raise NotImplementedError
 
     @abstractmethod
-    def delete(self, key):
-        return []
+    def mute(self, key_screen_name: str, unmuted_at: str) -> Result:
+        raise NotImplementedError
 
     @abstractmethod
-    def mute(self, key):
-        return []
-
-    @abstractmethod
-    def unmute(self, key):
-        return []
+    def unmute(self, key_screen_name: str) -> Result:
+        raise NotImplementedError
 
 
 if __name__ == "__main__":
     from timermute.db.mute_word_db import MuteWordDB
 
-    db_fullpath = Path("mute.db")
-    db_cont = MuteWordDB(db_fullpath=str(db_fullpath))
+    db_fullpath = ":memory:"
+    mute_word_db = MuteWordDB(db_fullpath=str(db_fullpath))
     pass

@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 coverage = "^7.4.0"
+freezegun = "^1.4.0"
 isort = "^5.13.2"
 mock = "^5.0.1"
 pycodestyle = "^2.11.1"

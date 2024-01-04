@@ -1,10 +1,13 @@
+from enum import Enum, auto
 import re
 from datetime import datetime, timedelta
 
 import PySimpleGUI as sg
 
-from timermute.db.mute_user_db import MuteUserDB
-from timermute.db.mute_word_db import MuteWordDB
+
+class Result(Enum):
+    SUCCESS = auto()
+    FAILED = auto()
 
 
 def now():
@@ -181,70 +184,6 @@ def popup_get_interval(
                 return None
         return interval_minutes
     return None
-
-
-def update_mute_word_table(window: sg.Window, mute_word_db: MuteWordDB) -> None:
-    """mute_word テーブルを更新する"""
-    # TODO::index保存
-
-    # ミュートワード取得
-    # 更新日時で降順ソートする
-    mute_word_list = mute_word_db.select()
-    mute_word_list_1 = [r for r in mute_word_list if r.status == "unmuted"]
-    mute_word_list_1.sort(key=lambda r: r.updated_at)
-    mute_word_list_1.reverse()
-    mute_word_list_2 = [r for r in mute_word_list if r.status == "muted"]
-    mute_word_list_2.sort(key=lambda r: r.updated_at)
-    mute_word_list_2.reverse()
-
-    table_data = [r.to_unmuted_table_list() for r in mute_word_list_1]
-    window["-LIST_1-"].update(values=table_data)
-    table_data = [r.to_muted_table_list() for r in mute_word_list_2]
-    window["-LIST_2-"].update(values=table_data)
-
-    # 新着マイリストの背景色とテキスト色を変更する
-    # update(values=list_data)で更新されるとデフォルトに戻る？
-    # 強調したいindexのみ適用すればそれ以外はデフォルトになる
-    # for i in include_new_index_list:
-    #     window["-LIST-"].Widget.itemconfig(i, fg="black", bg="light pink")
-
-    # indexをセットしてスクロール
-    # scroll_to_indexは強制的にindexを一番上に表示するのでWidget.seeを使用
-    # window["-LIST_1-"].Widget.see(index_1)
-    # window["-LIST_1-"].update(set_to_index=index_1)
-    return
-
-
-def update_mute_user_table(window: sg.Window, mute_user_db: MuteUserDB) -> None:
-    """mute_user テーブルを更新する"""
-    # TODO::index保存
-
-    # ミュートユーザー取得
-    # 更新日時で降順ソートする
-    mute_user_list = mute_user_db.select()
-    mute_user_list_1 = [r for r in mute_user_list if r.status == "unmuted"]
-    mute_user_list_1.sort(key=lambda r: r.updated_at)
-    mute_user_list_1.reverse()
-    mute_user_list_2 = [r for r in mute_user_list if r.status == "muted"]
-    mute_user_list_2.sort(key=lambda r: r.updated_at)
-    mute_user_list_2.reverse()
-
-    table_data = [r.to_unmuted_table_list() for r in mute_user_list_1]
-    window["-LIST_3-"].update(values=table_data)
-    table_data = [r.to_muted_table_list() for r in mute_user_list_2]
-    window["-LIST_4-"].update(values=table_data)
-
-    # 新着マイリストの背景色とテキスト色を変更する
-    # update(values=list_data)で更新されるとデフォルトに戻る？
-    # 強調したいindexのみ適用すればそれ以外はデフォルトになる
-    # for i in include_new_index_list:
-    #     window["-LIST-"].Widget.itemconfig(i, fg="black", bg="light pink")
-
-    # indexをセットしてスクロール
-    # scroll_to_indexは強制的にindexを一番上に表示するのでWidget.seeを使用
-    # window["-LIST_1-"].Widget.see(index_1)
-    # window["-LIST_1-"].update(set_to_index=index_1)
-    return
 
 
 if __name__ == "__main__":

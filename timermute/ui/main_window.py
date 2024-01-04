@@ -13,7 +13,6 @@ from timermute.process import mute_user_add, mute_user_del, mute_user_mute, mute
 from timermute.process.base import Base as ProcessBase
 from timermute.timer.restore import MuteUserRestoreTimer
 from timermute.ui.main_window_info import MainWindowInfo
-from timermute.ui.util import update_mute_user_table, update_mute_word_table
 
 
 class MainWindow:
@@ -63,23 +62,13 @@ class MainWindow:
 
         # ロード時にタイマーを復元する設定の場合は復元する
         if self.config["on_load"].getboolean("restore_timer"):
-            main_window_info = self.get_main_window_info()
+            main_window_info = self._get_main_window_info()
             MuteUserRestoreTimer.set(main_window_info)
             pass
 
         # UI表示更新
-        update_mute_word_table(self.window, self.mute_word_db)
-        update_mute_user_table(self.window, self.mute_user_db)
-
-    def get_main_window_info(self) -> MainWindowInfo:
-        main_window_info = MainWindowInfo(
-            self.window,
-            self.values,
-            self.mute_word_db,
-            self.mute_user_db,
-            self.config,
-        )
-        return main_window_info
+        self._update_mute_word_table()
+        self._update_mute_user_table()
 
     def _make_layout(self) -> list[list]:
         table_cols_name = ["No.", "     ミュートワード     ", "     更新日時     ", "     作成日時     "]
@@ -184,6 +173,56 @@ class MainWindow:
         ]
         return layout
 
+    def _update_mute_word_table(self) -> None:
+        """mute_word テーブルを更新する"""
+        window: sg.Window = self.window
+        mute_word_db: MuteWordDB = self.mute_word_db
+
+        # ミュートワード取得
+        # 更新日時で降順ソートする
+        mute_word_list = mute_word_db.select()
+        mute_word_list_1 = [r for r in mute_word_list if r.status == "unmuted"]
+        mute_word_list_1.sort(key=lambda r: r.updated_at)
+        mute_word_list_1.reverse()
+        mute_word_list_2 = [r for r in mute_word_list if r.status == "muted"]
+        mute_word_list_2.sort(key=lambda r: r.updated_at)
+        mute_word_list_2.reverse()
+
+        table_data = [r.to_unmuted_table_list() for r in mute_word_list_1]
+        window["-LIST_1-"].update(values=table_data)
+        table_data = [r.to_muted_table_list() for r in mute_word_list_2]
+        window["-LIST_2-"].update(values=table_data)
+
+    def _update_mute_user_table(self) -> None:
+        """mute_user テーブルを更新する"""
+        window: sg.Window = self.window
+        mute_user_db: MuteUserDB = self.mute_user_db
+
+        # ミュートユーザー取得
+        # 更新日時で降順ソートする
+        mute_user_list = mute_user_db.select()
+        mute_user_list_1 = [r for r in mute_user_list if r.status == "unmuted"]
+        mute_user_list_1.sort(key=lambda r: r.updated_at)
+        mute_user_list_1.reverse()
+        mute_user_list_2 = [r for r in mute_user_list if r.status == "muted"]
+        mute_user_list_2.sort(key=lambda r: r.updated_at)
+        mute_user_list_2.reverse()
+
+        table_data = [r.to_unmuted_table_list() for r in mute_user_list_1]
+        window["-LIST_3-"].update(values=table_data)
+        table_data = [r.to_muted_table_list() for r in mute_user_list_2]
+        window["-LIST_4-"].update(values=table_data)
+
+    def _get_main_window_info(self) -> MainWindowInfo:
+        main_window_info = MainWindowInfo(
+            self.window,
+            self.values,
+            self.mute_word_db,
+            self.mute_user_db,
+            self.config,
+        )
+        return main_window_info
+
     def run(self) -> None:
         logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
         # for name in logging.root.manager.loggerDict:
@@ -204,13 +243,13 @@ class MainWindow:
                 self.values = values
 
                 try:
-                    pb: ProcessBase = self.process_dict.get(event)()
+                    main_window_info = self._get_main_window_info()
+                    pb: ProcessBase = self.process_dict.get(event)(main_window_info)
 
                     if pb is None or not hasattr(pb, "run"):
                         continue
 
-                    main_window_info = self.get_main_window_info()
-                    pb.run(main_window_info)
+                    pb.run()
                 except Exception as e:
                     logger.error(e)
                     logger.error("main event loop error.")

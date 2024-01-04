@@ -3,6 +3,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from timermute.db.base import Base
 from timermute.db.model import MuteWord
+from timermute.util import now
 
 
 class MuteWordDB(Base):
@@ -19,7 +20,7 @@ class MuteWordDB(Base):
     def upsert(self, record: str | MuteWord) -> int:
         if isinstance(record, str):
             keyword = str(record)
-            record = MuteWord(keyword, "muted", self.now(), self.now(), "")
+            record = MuteWord(keyword, "muted", now(), now(), "")
 
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
@@ -63,7 +64,7 @@ class MuteWordDB(Base):
 
         target = session.query(MuteWord).filter(MuteWord.keyword == key).one()
         target.status = "muted"
-        target.updated_at = self.now()
+        target.updated_at = now()
         target.unmuted_at = unmuted_at
 
         session.commit()
@@ -76,7 +77,7 @@ class MuteWordDB(Base):
 
         target = session.query(MuteWord).filter(MuteWord.keyword == key).one()
         target.status = "unmuted"
-        target.updated_at = self.now()
+        target.updated_at = now()
         target.unmuted_at = ""
 
         session.commit()

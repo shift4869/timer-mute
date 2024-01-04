@@ -3,6 +3,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from timermute.db.base import Base
 from timermute.db.model import MuteUser
+from timermute.util import now
 
 
 class MuteUserDB(Base):
@@ -19,7 +20,7 @@ class MuteUserDB(Base):
     def upsert(self, record: str | MuteUser) -> int:
         if isinstance(record, str):
             screen_name = str(record)
-            record = MuteUser(screen_name, "muted", self.now(), self.now(), "")
+            record = MuteUser(screen_name, "muted", now(), now(), "")
 
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
@@ -46,37 +47,37 @@ class MuteUserDB(Base):
         session.close()
         return res
 
-    def delete(self, key) -> None:
+    def delete(self, key_screen_name) -> None:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
-        target = session.query(MuteUser).filter(MuteUser.screen_name == key).one()
+        target = session.query(MuteUser).filter(MuteUser.screen_name == key_screen_name).one()
         session.delete(target)
 
         session.commit()
         session.close()
         return
 
-    def mute(self, key, unmuted_at) -> None:
+    def mute(self, key_screen_name, unmuted_at) -> None:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
-        target = session.query(MuteUser).filter(MuteUser.screen_name == key).one()
+        target = session.query(MuteUser).filter(MuteUser.screen_name == key_screen_name).one()
         target.status = "muted"
-        target.updated_at = self.now()
+        target.updated_at = now()
         target.unmuted_at = unmuted_at
 
         session.commit()
         session.close()
         return
 
-    def unmute(self, key) -> None:
+    def unmute(self, key_screen_name) -> None:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
-        target = session.query(MuteUser).filter(MuteUser.screen_name == key).one()
+        target = session.query(MuteUser).filter(MuteUser.screen_name == key_screen_name).one()
         target.status = "unmuted"
-        target.updated_at = self.now()
+        target.updated_at = now()
         target.unmuted_at = ""
 
         session.commit()

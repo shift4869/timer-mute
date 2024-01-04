@@ -3,23 +3,22 @@ from logging import INFO, getLogger
 from timermute.muter.muter import Muter
 from timermute.process.base import Base
 from timermute.ui.main_window_info import MainWindowInfo
-from timermute.ui.util import update_mute_word_table
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
 class MuteWordUnmute(Base):
-    def __init__(self) -> None:
-        pass
+    def __init__(self, main_winfow_info: MainWindowInfo) -> None:
+        super().__init__(main_winfow_info)
 
-    def run(self, mw: MainWindowInfo) -> None:
+    def run(self) -> None:
         # "-MUTE_WORD_UNMUTE-"
         logger.info("MUTE_WORD_UNMUTE -> start")
         # 選択ミュート済ワードを取得
         logger.info("Getting selected muted word -> start")
-        index_list = mw.values["-LIST_2-"]
-        mute_word_list_all = mw.window["-LIST_2-"].get()
+        index_list = self.main_winfow_info.values["-LIST_2-"]
+        mute_word_list_all = self.main_winfow_info.window["-LIST_2-"].get()
         mute_word_list = []
         for i, mute_word in enumerate(mute_word_list_all):
             if i in index_list:
@@ -34,7 +33,7 @@ class MuteWordUnmute(Base):
         try:
             # Muter インスタンスを作成し、選択ワードのミュートを解除する
             logger.info("Unmute by unmute_keyword -> start")
-            config = mw.config
+            config = self.main_winfow_info.config
             muter = Muter(config)
             for mute_word in mute_word_list:
                 # 選択ワードのミュートを解除
@@ -46,14 +45,14 @@ class MuteWordUnmute(Base):
 
                 # DB修正
                 logger.info("DB update -> start")
-                mw.mute_word_db.unmute(mute_word_str)
+                self.main_winfow_info.mute_word_db.unmute(mute_word_str)
                 logger.info("DB update -> done")
             logger.info("Unmute by unmute_keyword -> done")
         except Exception as e:
             raise e
         finally:
             # UI表示更新
-            update_mute_word_table(mw.window, mw.mute_word_db)
+            self.update_mute_word_table()
         logger.info("MUTE_WORD_UNMUTE -> done")
         return
 

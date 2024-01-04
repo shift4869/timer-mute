@@ -4,23 +4,23 @@ from timermute.muter.muter import Muter
 from timermute.process.base import Base
 from timermute.timer.timer import MuteUserUnmuteTimer
 from timermute.ui.main_window_info import MainWindowInfo
-from timermute.ui.util import get_future_datetime, popup_get_interval, update_mute_user_table
+from timermute.util import get_future_datetime, popup_get_interval
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
 class MuteUserMute(Base):
-    def __init__(self) -> None:
-        pass
+    def __init__(self, main_winfow_info: MainWindowInfo) -> None:
+        super().__init__(main_winfow_info)
 
-    def run(self, mw: MainWindowInfo) -> None:
+    def run(self) -> None:
         # "-MUTE_USER_MUTE-"
         logger.info("MUTE_USER_MUTE -> start")
         # 選択ミュートユーザーを取得
-        index_list = mw.values["-LIST_3-"]
+        index_list = self.main_winfow_info.values["-LIST_3-"]
         logger.info("Getting selected mute user -> start")
-        mute_user_list_all = mw.window["-LIST_3-"].get()
+        mute_user_list_all = self.main_winfow_info.window["-LIST_3-"].get()
         mute_user_list = []
         for i, mute_user in enumerate(mute_user_list_all):
             if i in index_list:
@@ -35,7 +35,7 @@ class MuteUserMute(Base):
         try:
             # Muter インスタンスを作成し、選択ユーザーをミュートする
             logger.info("Mute by mute_user -> start")
-            config = mw.config
+            config = self.main_winfow_info.config
             muter = Muter(config)
             for mute_user in mute_user_list:
                 # 選択ユーザーをミュート
@@ -54,7 +54,7 @@ class MuteUserMute(Base):
                     # 解除タイマーセット
                     # interval = 10  # DEBUG
                     interval = interval_min * 60  # sec
-                    timer = MuteUserUnmuteTimer(mw, muter, interval, mute_user_str)
+                    timer = MuteUserUnmuteTimer(self.main_winfow_info, muter, interval, mute_user_str)
                     timer.start()
 
                     logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_user_str}'.")
@@ -62,14 +62,14 @@ class MuteUserMute(Base):
 
                 # DB追加
                 logger.info("DB update -> start")
-                mw.mute_user_db.mute(mute_user_str, unmuted_at)
+                self.main_winfow_info.mute_user_db.mute(mute_user_str, unmuted_at)
                 logger.info("DB update -> done")
             logger.info("Mute by mute_user -> done")
         except Exception as e:
             raise e
         finally:
             # UI表示更新
-            update_mute_user_table(mw.window, mw.mute_user_db)
+            self.update_mute_user_table()
         logger.info("MUTE_USER_MUTE -> done")
         return
 
