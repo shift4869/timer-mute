@@ -21,7 +21,7 @@ twitter-api-client = "^0.10.16"
 [tool.poetry.dev-dependencies]
 
 [tool.isort]
-line_length = 256
+line_length = 119
 multi_line_output = 9
 
 [tool.ruff]
@@ -31,7 +31,7 @@ exclude = [
     "__pycache__",
     ".git",
 ]
-line-length = 256
+line-length = 119
 
 [tool.ruff.lint]
 ignore = ["F401", "F541", "F841"]

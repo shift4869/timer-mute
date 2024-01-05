@@ -52,6 +52,9 @@ class Muter:
         return result
 
     def mute_keyword(self, keyword: str) -> dict:
+        if not isinstance(keyword, str):
+            raise ValueError("keyword must be str.")
+
         logger.info(f"POST mute word mute, target is '{keyword}' -> start")
         path = "mutes/keywords/create.json"
         payload = {
@@ -65,6 +68,9 @@ class Muter:
         return result
 
     def unmute_keyword(self, keyword: str) -> dict:
+        if not isinstance(keyword, str):
+            raise ValueError("keyword must be str.")
+
         logger.info(f"POST muted word unmute, target is '{keyword}' -> start")
 
         r_dict: dict = self.get_mute_keyword_list()
@@ -85,6 +91,9 @@ class Muter:
         return result
 
     def mute_user(self, screen_name: str) -> dict:
+        if not isinstance(screen_name, str):
+            raise ValueError("screen_name must be str.")
+
         logger.info(f"POST mute user mute, target is '{screen_name}' -> start")
         path = "mutes/users/create.json"
         payload = {
@@ -95,6 +104,9 @@ class Muter:
         return result
 
     def unmute_user(self, screen_name: str) -> dict:
+        if not isinstance(screen_name, str):
+            raise ValueError("screen_name must be str.")
+
         logger.info(f"POST muted user unmute, target is '{screen_name}' -> start")
         path = "mutes/users/destroy.json"
         payload = {
