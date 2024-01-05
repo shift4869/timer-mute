@@ -5,6 +5,7 @@ import PySimpleGUI as sg
 from timermute.db.mute_user_db import MuteUserDB
 from timermute.db.mute_word_db import MuteWordDB
 from timermute.ui.main_window_info import MainWindowInfo
+from timermute.util import Result
 
 
 class Base(metaclass=ABCMeta):
@@ -15,7 +16,7 @@ class Base(metaclass=ABCMeta):
             raise ValueError("main_winfow_info must be MainWindowInfo.")
         self.main_winfow_info = main_winfow_info
 
-    def update_mute_word_table(self) -> None:
+    def update_mute_word_table(self) -> Result:
         """mute_word テーブルを更新する"""
         window: sg.Window = self.main_winfow_info.window
         mute_word_db: MuteWordDB = self.main_winfow_info.mute_word_db
@@ -34,8 +35,9 @@ class Base(metaclass=ABCMeta):
         window["-LIST_1-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_word_list_2]
         window["-LIST_2-"].update(values=table_data)
+        return Result.SUCCESS
 
-    def update_mute_user_table(self) -> None:
+    def update_mute_user_table(self) -> Result:
         """mute_user テーブルを更新する"""
         window: sg.Window = self.main_winfow_info.window
         mute_user_db: MuteUserDB = self.main_winfow_info.mute_user_db
@@ -54,9 +56,10 @@ class Base(metaclass=ABCMeta):
         window["-LIST_3-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_user_list_2]
         window["-LIST_4-"].update(values=table_data)
+        return Result.SUCCESS
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self) -> Result:
         raise NotImplementedError
 
 
