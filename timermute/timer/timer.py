@@ -2,11 +2,12 @@ import threading
 from logging import INFO, getLogger
 from typing import Callable
 
-from timermute.muter.muter import Muter
-from timermute.ui.main_window_info import MainWindowInfo
+import PySimpleGUI as sg
+
 from timermute.db.mute_user_db import MuteUserDB
 from timermute.db.mute_word_db import MuteWordDB
-import PySimpleGUI as sg
+from timermute.muter.muter import Muter
+from timermute.ui.main_window_info import MainWindowInfo
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)

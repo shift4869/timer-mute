@@ -1,6 +1,6 @@
-from enum import Enum, auto
 import re
 from datetime import datetime, timedelta
+from enum import Enum, auto
 
 import PySimpleGUI as sg
 

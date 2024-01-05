@@ -1,12 +1,11 @@
 import sys
-from typing import Self
 import unittest
+from typing import Self
 
 from mock import patch
-
-from timermute.db.base import Base
 from sqlalchemy.pool import StaticPool
 
+from timermute.db.base import Base
 from timermute.db.model import Base as ModelBase
 from timermute.util import Result
 

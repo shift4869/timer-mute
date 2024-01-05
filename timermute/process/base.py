@@ -1,9 +1,10 @@
 from abc import ABCMeta, abstractmethod
 
-from timermute.ui.main_window_info import MainWindowInfo
+import PySimpleGUI as sg
+
 from timermute.db.mute_user_db import MuteUserDB
 from timermute.db.mute_word_db import MuteWordDB
-import PySimpleGUI as sg
+from timermute.ui.main_window_info import MainWindowInfo
 
 
 class Base(metaclass=ABCMeta):

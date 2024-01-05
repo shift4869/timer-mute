@@ -34,7 +34,7 @@ class MuteWord(Base):
         self.unmuted_at = unmuted_at
 
     def __repr__(self) -> str:
-        return "<MuteWord(id='{}', keyword='{}')>".format(self.id, self.keyword)
+        return f"<MuteWord(id='{self.id}', keyword='{self.keyword}')>"
 
     def __eq__(self, other) -> bool:
         return isinstance(other, MuteWord) and other.keyword == self.keyword
@@ -112,7 +112,7 @@ class MuteUser(Base):
         self.unmuted_at = unmuted_at
 
     def __repr__(self) -> str:
-        return "<MuteUser(id='{}', screen_name='{}')>".format(self.id, self.screen_name)
+        return f"<MuteUser(id='{self.id}', screen_name='{self.screen_name}')>"
 
     def __eq__(self, other) -> bool:
         return isinstance(other, MuteUser) and other.screen_name == self.screen_name
