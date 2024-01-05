@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from typing import Self
 
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
@@ -29,7 +28,7 @@ class Base(metaclass=ABCMeta):
         ModelBase.metadata.create_all(self.engine)
 
     @abstractmethod
-    def select(self) -> list[Self]:
+    def select(self) -> list[ModelBase]:
         raise NotImplementedError
 
     @abstractmethod

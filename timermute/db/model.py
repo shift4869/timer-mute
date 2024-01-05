@@ -192,15 +192,15 @@ if __name__ == "__main__":
 
     session.query(MuteUser).delete()
 
-    mute_word_list = [
+    mute_user_list = [
         ("test_account_1", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
         ("test_account_2", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
         ("test_account_3", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
         ("test_account_4", "unmuted", "2023-04-08 00:01:00", "2023-04-08 00:02:00", ""),
     ]
 
-    for i, data in enumerate(mute_word_list):
-        mute_word_record = MuteUser(
+    for i, data in enumerate(mute_user_list):
+        mute_user_record = MuteUser(
             # id=i,
             screen_name=data[0],
             status=data[1],
@@ -208,7 +208,7 @@ if __name__ == "__main__":
             updated_at=data[3],
             unmuted_at=data[4],
         )
-        session.add(mute_word_record)
+        session.add(mute_user_record)
     session.commit()
 
     result = session.query(MuteUser).all()[:10]

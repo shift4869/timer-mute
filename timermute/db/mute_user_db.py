@@ -1,9 +1,11 @@
+from datetime import datetime
+
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
 from timermute.db.base import Base
 from timermute.db.model import MuteUser
-from timermute.util import now
+from timermute.util import Result, now
 
 
 class MuteUserDB(Base):
@@ -17,14 +19,12 @@ class MuteUserDB(Base):
         session.close()
         return result
 
-    def upsert(self, record: str | MuteUser) -> int:
-        if isinstance(record, str):
-            screen_name = str(record)
-            record = MuteUser(screen_name, "muted", now(), now(), "")
+    def upsert(self, record: MuteUser) -> Result:
+        if not isinstance(record, MuteUser):
+            raise ValueError("record must be MuteUser.")
 
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
-        res = -1
 
         try:
             q = session.query(MuteUser).filter(MuteUser.screen_name == record.screen_name).with_for_update()
@@ -32,7 +32,6 @@ class MuteUserDB(Base):
         except NoResultFound:
             # INSERT
             session.add(record)
-            res = 0
         else:
             # UPDATE
             # id以外を更新する
@@ -41,13 +40,15 @@ class MuteUserDB(Base):
             p.created_at = record.created_at
             p.updated_at = record.updated_at
             p.unmuted_at = record.unmuted_at
-            res = 1
 
         session.commit()
         session.close()
-        return res
+        return Result.SUCCESS
 
-    def delete(self, key_screen_name) -> None:
+    def delete(self, key_screen_name: str) -> Result:
+        if not isinstance(key_screen_name, str):
+            raise ValueError("key_screen_name must be str.")
+
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
@@ -56,9 +57,18 @@ class MuteUserDB(Base):
 
         session.commit()
         session.close()
-        return
+        return Result.SUCCESS
 
-    def mute(self, key_screen_name, unmuted_at) -> None:
+    def mute(self, key_screen_name: str, unmuted_at: str) -> Result:
+        if not isinstance(key_screen_name, str):
+            raise ValueError("key_screen_name must be str.")
+        if not isinstance(unmuted_at, str):
+            raise ValueError("unmuted_at must be str.")
+
+        if unmuted_at:
+            destination_format = "%Y-%m-%d %H:%M:%S"
+            _ = datetime.strptime(unmuted_at, destination_format)
+
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
@@ -69,9 +79,12 @@ class MuteUserDB(Base):
 
         session.commit()
         session.close()
-        return
+        return Result.SUCCESS
 
-    def unmute(self, key_screen_name) -> None:
+    def unmute(self, key_screen_name: str) -> Result:
+        if not isinstance(key_screen_name, str):
+            raise ValueError("key_screen_name must be str.")
+
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
 
@@ -82,4 +95,4 @@ class MuteUserDB(Base):
 
         session.commit()
         session.close()
-        return
+        return Result.SUCCESS
