@@ -48,6 +48,24 @@ class TestBase(unittest.TestCase):
             ],
             main_winfow_info.mock_calls,
         )
+        main_winfow_info.reset_mock()
+
+        r = MagicMock()
+        r.status = "unmuted"
+        r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
+        main_winfow_info.mute_word_db.select.side_effect = lambda: [r]
+        actual = instance.update_mute_word_table()
+        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(
+            [
+                call.mute_word_db.select(),
+                call.window.__getitem__("-LIST_1-"),
+                call.window.__getitem__().update(values=["to_unmuted_table_list()"]),
+                call.window.__getitem__("-LIST_2-"),
+                call.window.__getitem__().update(values=[]),
+            ],
+            main_winfow_info.mock_calls,
+        )
 
     def test_update_mute_user_table(self):
         main_winfow_info = MagicMock(spec=MainWindowInfo)
@@ -67,6 +85,24 @@ class TestBase(unittest.TestCase):
                 call.window.__getitem__().update(values=[]),
                 call.window.__getitem__("-LIST_4-"),
                 call.window.__getitem__().update(values=["to_muted_table_list()"]),
+            ],
+            main_winfow_info.mock_calls,
+        )
+        main_winfow_info.reset_mock()
+
+        r = MagicMock()
+        r.status = "unmuted"
+        r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
+        main_winfow_info.mute_user_db.select.side_effect = lambda: [r]
+        actual = instance.update_mute_user_table()
+        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(
+            [
+                call.mute_user_db.select(),
+                call.window.__getitem__("-LIST_3-"),
+                call.window.__getitem__().update(values=["to_unmuted_table_list()"]),
+                call.window.__getitem__("-LIST_4-"),
+                call.window.__getitem__().update(values=[]),
             ],
             main_winfow_info.mock_calls,
         )

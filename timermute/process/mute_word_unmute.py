@@ -3,6 +3,7 @@ from logging import INFO, getLogger
 from timermute.muter.muter import Muter
 from timermute.process.base import Base
 from timermute.ui.main_window_info import MainWindowInfo
+from timermute.util import Result
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -27,7 +28,7 @@ class MuteWordUnmute(Base):
             logger.info("Selected muted word is empty.")
             logger.info("Getting selected mute word -> done")
             logger.info("MUTE_WORD_UNMUTE -> done")
-            return
+            return Result.FAILED
         logger.info("Getting selected muted word -> done")
 
         try:
@@ -51,10 +52,9 @@ class MuteWordUnmute(Base):
         except Exception as e:
             raise e
         finally:
-            # UI表示更新
             self.update_mute_word_table()
         logger.info("MUTE_WORD_UNMUTE -> done")
-        return
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":

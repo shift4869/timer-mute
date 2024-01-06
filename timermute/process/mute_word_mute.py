@@ -4,7 +4,7 @@ from timermute.muter.muter import Muter
 from timermute.process.base import Base
 from timermute.timer.timer import MuteWordUnmuteTimer
 from timermute.ui.main_window_info import MainWindowInfo
-from timermute.util import get_future_datetime, popup_get_interval
+from timermute.util import Result, get_future_datetime, popup_get_interval
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -14,7 +14,7 @@ class MuteWordMute(Base):
     def __init__(self, main_winfow_info: MainWindowInfo) -> None:
         super().__init__(main_winfow_info)
 
-    def run(self) -> None:
+    def run(self) -> Result:
         # "-MUTE_WORD_MUTE-"
         logger.info("MUTE_WORD_MUTE -> start")
         # 選択ミュートワードを取得
@@ -29,7 +29,7 @@ class MuteWordMute(Base):
             logger.info("Selected mute word is empty.")
             logger.info("Getting selected mute word -> done")
             logger.info("MUTE_WORD_MUTE -> done")
-            return
+            return Result.FAILED
         logger.info("Getting selected mute word -> start")
 
         try:
@@ -68,10 +68,9 @@ class MuteWordMute(Base):
         except Exception as e:
             raise e
         finally:
-            # UI表示更新
             self.update_mute_word_table()
         logger.info("MUTE_WORD_MUTE -> done")
-        return
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ from timermute.muter.muter import Muter
 from timermute.process.base import Base
 from timermute.timer.timer import MuteUserUnmuteTimer
 from timermute.ui.main_window_info import MainWindowInfo
-from timermute.util import get_future_datetime, popup_get_interval
+from timermute.util import Result, get_future_datetime, popup_get_interval
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -14,7 +14,7 @@ class MuteUserMute(Base):
     def __init__(self, main_winfow_info: MainWindowInfo) -> None:
         super().__init__(main_winfow_info)
 
-    def run(self) -> None:
+    def run(self) -> Result:
         # "-MUTE_USER_MUTE-"
         logger.info("MUTE_USER_MUTE -> start")
         # 選択ミュートユーザーを取得
@@ -29,11 +29,11 @@ class MuteUserMute(Base):
             logger.info("Selected mute user is empty.")
             logger.info("Getting selected mute user -> done")
             logger.info("MUTE_WORD_MUTE -> done")
-            return
+            return Result.FAILED
         logger.info("Getting selected mute user -> start")
 
         try:
-            # Muter インスタンスを作成し、選択ユーザーをミュートする
+            # 選択ユーザーをミュートする
             logger.info("Mute by mute_user -> start")
             config = self.main_winfow_info.config
             muter = Muter(config)
@@ -68,10 +68,9 @@ class MuteUserMute(Base):
         except Exception as e:
             raise e
         finally:
-            # UI表示更新
             self.update_mute_user_table()
         logger.info("MUTE_USER_MUTE -> done")
-        return
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":

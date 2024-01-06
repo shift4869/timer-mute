@@ -2,6 +2,7 @@ from logging import INFO, getLogger
 
 from timermute.process.base import Base
 from timermute.ui.main_window_info import MainWindowInfo
+from timermute.util import Result
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -11,7 +12,7 @@ class MuteWordDel(Base):
     def __init__(self, main_winfow_info: MainWindowInfo) -> None:
         super().__init__(main_winfow_info)
 
-    def run(self) -> None:
+    def run(self) -> Result:
         # "-MUTE_WORD_DEL-"
         logger.info("MUTE_WORD_DEL -> start")
         # 選択ミュートワードを取得
@@ -26,7 +27,7 @@ class MuteWordDel(Base):
             logger.info(f"Selected mute word is empty.")
             logger.info("Getting selected mute word -> done")
             logger.info("MUTE_WORD_DEL -> done")
-            return
+            return Result.FAILED
         logger.info("Getting selected mute word -> done")
 
         try:
@@ -40,10 +41,9 @@ class MuteWordDel(Base):
         except Exception as e:
             raise e
         finally:
-            # UI表示更新
             self.update_mute_word_table()
         logger.info("MUTE_WORD_DEL -> done")
-        return
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":

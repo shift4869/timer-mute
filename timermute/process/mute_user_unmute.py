@@ -3,6 +3,7 @@ from logging import INFO, getLogger
 from timermute.muter.muter import Muter
 from timermute.process.base import Base
 from timermute.ui.main_window_info import MainWindowInfo
+from timermute.util import Result
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -12,7 +13,7 @@ class MuteUserUnmute(Base):
     def __init__(self, main_winfow_info: MainWindowInfo) -> None:
         super().__init__(main_winfow_info)
 
-    def run(self) -> None:
+    def run(self) -> Result:
         # "-MUTE_USER_UNMUTE-"
         logger.info("MUTE_USER_UNMUTE -> start")
         # 選択ミュート済ユーザーを取得
@@ -27,7 +28,7 @@ class MuteUserUnmute(Base):
             logger.info("Selected muted user is empty.")
             logger.info("Getting selected mute user -> done")
             logger.info("MUTE_WORD_UNMUTE -> done")
-            return
+            return Result.FAILED
         logger.info("Getting selected muted user -> start")
 
         try:
@@ -54,7 +55,7 @@ class MuteUserUnmute(Base):
             # UI表示更新
             self.update_mute_user_table()
         logger.info("MUTE_USER_UNMUTE -> done")
-        return
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":

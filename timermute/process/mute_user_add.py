@@ -5,7 +5,7 @@ from timermute.muter.muter import Muter
 from timermute.process.base import Base
 from timermute.timer.timer import MuteUserUnmuteTimer
 from timermute.ui.main_window_info import MainWindowInfo
-from timermute.util import get_future_datetime, now, popup_get_interval, popup_get_text
+from timermute.util import Result, get_future_datetime, now, popup_get_interval, popup_get_text
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -15,16 +15,15 @@ class MuteUserAdd(Base):
     def __init__(self, main_winfow_info: MainWindowInfo) -> None:
         super().__init__(main_winfow_info)
 
-    def run(self) -> None:
+    def run(self) -> Result:
         # "-MUTE_USER_ADD-"
         logger.info("MUTE_USER_ADD -> start")
         # ミュートユーザーをユーザーに問い合せる
         mute_user_str = popup_get_text("mute user input.")
         if not mute_user_str:
-            return
+            return Result.FAILED
 
         try:
-            # デフォルトでミュートする
             logger.info("Mute by mute_user -> start")
             logger.info(f"Target user is '{mute_user_str}'.")
             config = self.main_winfow_info.config
@@ -57,10 +56,9 @@ class MuteUserAdd(Base):
         except Exception as e:
             raise e
         finally:
-            # UI表示更新
             self.update_mute_user_table()
         logger.info("MUTE_USER_ADD -> start")
-        return
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":
