@@ -25,19 +25,19 @@ class TestMuteUserMute(unittest.TestCase):
         mock_update_mute_user_table = self.enterContext(
             patch("timermute.process.mute_user_mute.Base.update_mute_user_table")
         )
-        main_winfow_info = MagicMock(spec=MainWindowInfo)
-        main_winfow_info.values = MagicMock(spec=dict)
-        main_winfow_info.window = MagicMock(spec=sg.Window)
-        main_winfow_info.mute_user_db = MagicMock(spec=MuteUserDB)
-        main_winfow_info.config = MagicMock(spec=configparser.ConfigParser)
-        instnace = MuteUserMute(main_winfow_info)
+        main_window_info = MagicMock(spec=MainWindowInfo)
+        main_window_info.values = MagicMock(spec=dict)
+        main_window_info.window = MagicMock(spec=sg.Window)
+        main_window_info.mute_user_db = MagicMock(spec=MuteUserDB)
+        main_window_info.config = MagicMock(spec=configparser.ConfigParser)
+        instnace = MuteUserMute(main_window_info)
 
         def pre_run(index_list, mute_user_list_all, interval_min, is_valid_muter):
-            main_winfow_info.values.reset_mock()
-            main_winfow_info.values.__getitem__.side_effect = lambda key: index_list
-            main_winfow_info.window.reset_mock()
-            main_winfow_info.window.__getitem__.return_value.get.side_effect = lambda: mute_user_list_all
-            main_winfow_info.mute_user_db.reset_mock()
+            main_window_info.values.reset_mock()
+            main_window_info.values.__getitem__.side_effect = lambda key: index_list
+            main_window_info.window.reset_mock()
+            main_window_info.window.__getitem__.return_value.get.side_effect = lambda: mute_user_list_all
+            main_window_info.mute_user_db.reset_mock()
 
             mock_muter.reset_mock()
             if not is_valid_muter:
@@ -48,9 +48,9 @@ class TestMuteUserMute(unittest.TestCase):
             mock_update_mute_user_table.reset_mock()
 
         def post_run(index_list, mute_user_list_all, interval_min, is_valid_muter):
-            self.assertEqual([call.__getitem__("-LIST_3-")], main_winfow_info.values.mock_calls)
+            self.assertEqual([call.__getitem__("-LIST_3-")], main_window_info.values.mock_calls)
             self.assertEqual(
-                [call.__getitem__("-LIST_3-"), call.__getitem__().get()], main_winfow_info.window.mock_calls
+                [call.__getitem__("-LIST_3-"), call.__getitem__().get()], main_window_info.window.mock_calls
             )
 
             mute_user_list = []
@@ -58,7 +58,7 @@ class TestMuteUserMute(unittest.TestCase):
                 if i in index_list:
                     mute_user_list.append(mute_user)
             if not mute_user_list:
-                main_winfow_info.mute_user_db.assert_not_called()
+                main_window_info.mute_user_db.assert_not_called()
                 mock_muter.reset_mock()
                 mock_popup_get_interval.reset_mock()
                 mock_mute_user_unmute_timer.reset_mock()
@@ -68,10 +68,10 @@ class TestMuteUserMute(unittest.TestCase):
             mute_user_str = mute_user_list[0][1]
             if is_valid_muter:
                 self.assertEqual(
-                    [call(main_winfow_info.config), call().mute_user(mute_user_str)], mock_muter.mock_calls
+                    [call(main_window_info.config), call().mute_user(mute_user_str)], mock_muter.mock_calls
                 )
             else:
-                self.assertEqual([call(main_winfow_info.config)], mock_muter.mock_calls)
+                self.assertEqual([call(main_window_info.config)], mock_muter.mock_calls)
                 mock_popup_get_interval.assert_not_called()
                 mock_mute_user_unmute_timer.assert_not_called()
                 self.assertEqual([call()], mock_update_mute_user_table.mock_calls)
@@ -81,7 +81,7 @@ class TestMuteUserMute(unittest.TestCase):
             if interval_min:
                 self.assertEqual(
                     [
-                        call(main_winfow_info, mock_muter.return_value, interval_min * 60, mute_user_str),
+                        call(main_window_info, mock_muter.return_value, interval_min * 60, mute_user_str),
                         call().start(),
                     ],
                     mock_mute_user_unmute_timer.mock_calls,
@@ -89,7 +89,7 @@ class TestMuteUserMute(unittest.TestCase):
             else:
                 mock_mute_user_unmute_timer.assert_not_called()
 
-            self.assertEqual([call.mute(mute_user_str, unmuted_at)], main_winfow_info.mute_user_db.mock_calls)
+            self.assertEqual([call.mute(mute_user_str, unmuted_at)], main_window_info.mute_user_db.mock_calls)
             self.assertEqual([call()], mock_update_mute_user_table.mock_calls)
 
         Params = namedtuple("Params", ["index_list", "mute_user_list_all", "interval_min", "is_valid_muter", "result"])

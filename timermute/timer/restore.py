@@ -4,6 +4,7 @@ from logging import INFO, getLogger
 from timermute.muter.muter import Muter
 from timermute.timer.timer import MuteUserUnmuteTimer, MuteWordUnmuteTimer
 from timermute.ui.main_window_info import MainWindowInfo
+from timermute.util import Result
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -14,8 +15,8 @@ class RestoreTimerBase:
         pass
 
     @classmethod
-    def set(self, main_window_info: MainWindowInfo) -> None:
-        pass
+    def set(self, main_window_info: MainWindowInfo) -> Result:
+        return Result.SUCCESS
 
 
 class MuteWordRestoreTimer(RestoreTimerBase):
@@ -23,7 +24,7 @@ class MuteWordRestoreTimer(RestoreTimerBase):
         super().__init__()
 
     @classmethod
-    def set(self, main_window_info: MainWindowInfo) -> None:
+    def set(self, main_window_info: MainWindowInfo) -> Result:
         muter = Muter(main_window_info.config)
         mute_word_all = main_window_info.mute_word_db.select()
         mute_word_restore_list = [r for r in mute_word_all if r.status == "muted"]
@@ -52,9 +53,10 @@ class MuteWordRestoreTimer(RestoreTimerBase):
                 except Exception as e:
                     logger.warning(e)
                     pass
-                continue
-            timer = MuteWordUnmuteTimer(main_window_info, muter, interval, target_keyword)
-            timer.start()
+            else:
+                timer = MuteWordUnmuteTimer(main_window_info, muter, interval, target_keyword)
+                timer.start()
+        return Result.SUCCESS
 
 
 class MuteUserRestoreTimer(RestoreTimerBase):
@@ -62,7 +64,7 @@ class MuteUserRestoreTimer(RestoreTimerBase):
         super().__init__()
 
     @classmethod
-    def set(self, main_window_info: MainWindowInfo) -> None:
+    def set(self, main_window_info: MainWindowInfo) -> Result:
         muter = Muter(main_window_info.config)
         mute_user_all = main_window_info.mute_user_db.select()
         mute_user_restore_list = [r for r in mute_user_all if r.status == "muted"]
@@ -91,9 +93,10 @@ class MuteUserRestoreTimer(RestoreTimerBase):
                 except Exception as e:
                     logger.warning(e)
                     pass
-                continue
-            timer = MuteUserUnmuteTimer(main_window_info, muter, interval, target_screen_name)
-            timer.start()
+            else:
+                timer = MuteUserUnmuteTimer(main_window_info, muter, interval, target_screen_name)
+                timer.start()
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":

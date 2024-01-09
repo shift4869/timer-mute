@@ -10,16 +10,16 @@ logger.setLevel(INFO)
 
 
 class MuteUserUnmute(Base):
-    def __init__(self, main_winfow_info: MainWindowInfo) -> None:
-        super().__init__(main_winfow_info)
+    def __init__(self, main_window_info: MainWindowInfo) -> None:
+        super().__init__(main_window_info)
 
     def run(self) -> Result:
         # "-MUTE_USER_UNMUTE-"
         logger.info("MUTE_USER_UNMUTE -> start")
         # 選択ミュート済ユーザーを取得
         logger.info("Getting selected muted user -> start")
-        index_list = self.main_winfow_info.values["-LIST_4-"]
-        mute_user_list_all = self.main_winfow_info.window["-LIST_4-"].get()
+        index_list = self.main_window_info.values["-LIST_4-"]
+        mute_user_list_all = self.main_window_info.window["-LIST_4-"].get()
         mute_user_list = []
         for i, mute_user in enumerate(mute_user_list_all):
             if i in index_list:
@@ -34,7 +34,7 @@ class MuteUserUnmute(Base):
         try:
             # Muter インスタンスを作成し、選択ユーザーのミュートを解除する
             logger.info("Unmute by unmute_user -> start")
-            config = self.main_winfow_info.config
+            config = self.main_window_info.config
             muter = Muter(config)
             for mute_user in mute_user_list:
                 # 選択ユーザーのミュートを解除
@@ -46,7 +46,7 @@ class MuteUserUnmute(Base):
 
                 # DB修正
                 logger.info("DB update -> start")
-                self.main_winfow_info.mute_user_db.unmute(mute_user_str)
+                self.main_window_info.mute_user_db.unmute(mute_user_str)
                 logger.info("DB update -> done")
             logger.info("Unmute by unmute_user -> done")
         except Exception as e:

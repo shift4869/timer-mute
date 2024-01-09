@@ -11,16 +11,16 @@ logger.setLevel(INFO)
 
 
 class MuteUserMute(Base):
-    def __init__(self, main_winfow_info: MainWindowInfo) -> None:
-        super().__init__(main_winfow_info)
+    def __init__(self, main_window_info: MainWindowInfo) -> None:
+        super().__init__(main_window_info)
 
     def run(self) -> Result:
         # "-MUTE_USER_MUTE-"
         logger.info("MUTE_USER_MUTE -> start")
         # 選択ミュートユーザーを取得
-        index_list = self.main_winfow_info.values["-LIST_3-"]
+        index_list = self.main_window_info.values["-LIST_3-"]
         logger.info("Getting selected mute user -> start")
-        mute_user_list_all = self.main_winfow_info.window["-LIST_3-"].get()
+        mute_user_list_all = self.main_window_info.window["-LIST_3-"].get()
         mute_user_list = []
         for i, mute_user in enumerate(mute_user_list_all):
             if i in index_list:
@@ -35,7 +35,7 @@ class MuteUserMute(Base):
         try:
             # 選択ユーザーをミュートする
             logger.info("Mute by mute_user -> start")
-            config = self.main_winfow_info.config
+            config = self.main_window_info.config
             muter = Muter(config)
             for mute_user in mute_user_list:
                 # 選択ユーザーをミュート
@@ -54,7 +54,7 @@ class MuteUserMute(Base):
                     # 解除タイマーセット
                     # interval = 10  # DEBUG
                     interval = interval_min * 60  # sec
-                    timer = MuteUserUnmuteTimer(self.main_winfow_info, muter, interval, mute_user_str)
+                    timer = MuteUserUnmuteTimer(self.main_window_info, muter, interval, mute_user_str)
                     timer.start()
 
                     logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_user_str}'.")
@@ -62,7 +62,7 @@ class MuteUserMute(Base):
 
                 # DB追加
                 logger.info("DB update -> start")
-                self.main_winfow_info.mute_user_db.mute(mute_user_str, unmuted_at)
+                self.main_window_info.mute_user_db.mute(mute_user_str, unmuted_at)
                 logger.info("DB update -> done")
             logger.info("Mute by mute_user -> done")
         except Exception as e:

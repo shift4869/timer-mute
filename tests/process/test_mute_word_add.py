@@ -26,10 +26,10 @@ class TestMuteWordAdd(unittest.TestCase):
         mock_update_mute_word_table = self.enterContext(
             patch("timermute.process.mute_word_add.MuteWordAdd.update_mute_word_table")
         )
-        main_winfow_info = MagicMock(spec=MainWindowInfo)
-        main_winfow_info.config = MagicMock(spec=configparser.ConfigParser)
-        main_winfow_info.mute_word_db = MagicMock(spec=MuteWordDB)
-        instnace = MuteWordAdd(main_winfow_info)
+        main_window_info = MagicMock(spec=MainWindowInfo)
+        main_window_info.config = MagicMock(spec=configparser.ConfigParser)
+        main_window_info.mute_word_db = MagicMock(spec=MuteWordDB)
+        instnace = MuteWordAdd(main_window_info)
 
         def pre_run(mute_word_str, interval_min, is_valid_muter):
             mock_popup_get_text.reset_mock()
@@ -58,10 +58,10 @@ class TestMuteWordAdd(unittest.TestCase):
 
             if is_valid_muter:
                 self.assertEqual(
-                    [call(main_winfow_info.config), call().mute_keyword("mute_word_str")], mock_muter.mock_calls
+                    [call(main_window_info.config), call().mute_keyword("mute_word_str")], mock_muter.mock_calls
                 )
             else:
-                self.assertEqual([call(main_winfow_info.config)], mock_muter.mock_calls)
+                self.assertEqual([call(main_window_info.config)], mock_muter.mock_calls)
                 mock_popup_get_interval.assert_not_called()
                 mock_mute_word_unmute_timer.assert_not_called()
                 mock_mute_word.assert_not_called()
@@ -73,7 +73,7 @@ class TestMuteWordAdd(unittest.TestCase):
             if interval_min:
                 self.assertEqual(
                     [
-                        call(main_winfow_info, mock_muter.return_value, interval_min * 60, "mute_word_str"),
+                        call(main_window_info, mock_muter.return_value, interval_min * 60, "mute_word_str"),
                         call().start(),
                     ],
                     mock_mute_word_unmute_timer.mock_calls,

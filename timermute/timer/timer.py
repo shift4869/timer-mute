@@ -8,6 +8,7 @@ from timermute.db.mute_user_db import MuteUserDB
 from timermute.db.mute_word_db import MuteWordDB
 from timermute.muter.muter import Muter
 from timermute.ui.main_window_info import MainWindowInfo
+from timermute.util import Result
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -33,16 +34,16 @@ class TimerBase:
 
 
 class MuteWordUnmuteTimer(TimerBase):
-    def __init__(self, mw: MainWindowInfo, muter: Muter, interval: float, target_keyword: str) -> None:
+    def __init__(self, main_window_info: MainWindowInfo, muter: Muter, interval: float, target_keyword: str) -> None:
+        self.main_window_info = main_window_info
         self.muter = muter
-        self.mw = mw
         self.keyword = target_keyword
         super().__init__(interval, self.run, ())
 
-    def update_mute_word_table(self) -> None:
+    def update_mute_word_table(self) -> Result:
         """mute_word テーブルを更新する"""
-        window: sg.Window = self.mw.window
-        mute_word_db: MuteWordDB = self.mw.mute_word_db
+        window: sg.Window = self.main_window_info.window
+        mute_word_db: MuteWordDB = self.main_window_info.mute_word_db
 
         # ミュートワード取得
         # 更新日時で降順ソートする
@@ -58,8 +59,9 @@ class MuteWordUnmuteTimer(TimerBase):
         window["-LIST_1-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_word_list_2]
         window["-LIST_2-"].update(values=table_data)
+        return Result.SUCCESS
 
-    def run(self) -> None:
+    def run(self) -> Result:
         logger.info("Timer run -> start")
         try:
             logger.info("Unmute keyword -> start")
@@ -71,26 +73,29 @@ class MuteWordUnmuteTimer(TimerBase):
             pass
         try:
             logger.info("DB update -> start")
-            self.mw.mute_word_db.unmute(self.keyword)
+            self.main_window_info.mute_word_db.unmute(self.keyword)
             logger.info("DB update -> done")
         except Exception as e:
             logger.warning(e)
             pass
         self.update_mute_word_table()
         logger.info("Timer run -> done")
+        return Result.SUCCESS
 
 
 class MuteUserUnmuteTimer(TimerBase):
-    def __init__(self, mw: MainWindowInfo, muter: Muter, interval: float, target_screen_name: str) -> None:
+    def __init__(
+        self, main_window_info: MainWindowInfo, muter: Muter, interval: float, target_screen_name: str
+    ) -> None:
         self.muter = muter
-        self.mw = mw
+        self.main_window_info = main_window_info
         self.screen_name = target_screen_name
         super().__init__(interval, self.run, ())
 
     def update_mute_user_table(self) -> None:
         """mute_user テーブルを更新する"""
-        window: sg.Window = self.mw.window
-        mute_user_db: MuteUserDB = self.mw.mute_user_db
+        window: sg.Window = self.main_window_info.window
+        mute_user_db: MuteUserDB = self.main_window_info.mute_user_db
 
         # ミュートユーザー取得
         # 更新日時で降順ソートする
@@ -119,7 +124,7 @@ class MuteUserUnmuteTimer(TimerBase):
             pass
         try:
             logger.info("DB update -> start")
-            self.mw.mute_user_db.unmute(self.screen_name)
+            self.main_window_info.mute_user_db.unmute(self.screen_name)
             logger.info("DB update -> done")
         except Exception as e:
             logger.warning(e)

@@ -20,29 +20,29 @@ class TestMuteWordUnmute(unittest.TestCase):
         mock_update_mute_word_table = self.enterContext(
             patch("timermute.process.mute_word_unmute.Base.update_mute_word_table")
         )
-        main_winfow_info = MagicMock(spec=MainWindowInfo)
-        main_winfow_info.values = MagicMock(spec=dict)
-        main_winfow_info.window = MagicMock(spec=sg.Window)
-        main_winfow_info.mute_word_db = MagicMock(spec=MuteWordDB)
-        main_winfow_info.config = MagicMock(spec=configparser.ConfigParser)
-        instnace = MuteWordUnmute(main_winfow_info)
+        main_window_info = MagicMock(spec=MainWindowInfo)
+        main_window_info.values = MagicMock(spec=dict)
+        main_window_info.window = MagicMock(spec=sg.Window)
+        main_window_info.mute_word_db = MagicMock(spec=MuteWordDB)
+        main_window_info.config = MagicMock(spec=configparser.ConfigParser)
+        instnace = MuteWordUnmute(main_window_info)
 
         def pre_run(index_list, mute_word_list_all, is_valid_muter):
-            main_winfow_info.values.reset_mock()
-            main_winfow_info.values.__getitem__.side_effect = lambda key: index_list
-            main_winfow_info.window.reset_mock()
-            main_winfow_info.window.__getitem__.return_value.get.side_effect = lambda: mute_word_list_all
-            main_winfow_info.mute_word_db.reset_mock()
-            main_winfow_info.config.reset_mock()
+            main_window_info.values.reset_mock()
+            main_window_info.values.__getitem__.side_effect = lambda key: index_list
+            main_window_info.window.reset_mock()
+            main_window_info.window.__getitem__.return_value.get.side_effect = lambda: mute_word_list_all
+            main_window_info.mute_word_db.reset_mock()
+            main_window_info.config.reset_mock()
             mock_muter.reset_mock()
             if not is_valid_muter:
                 mock_muter.side_effect = ValueError
             mock_update_mute_word_table.reset_mock()
 
         def post_run(index_list, mute_word_list_all, is_valid_muter):
-            self.assertEqual([call.__getitem__("-LIST_2-")], main_winfow_info.values.mock_calls)
+            self.assertEqual([call.__getitem__("-LIST_2-")], main_window_info.values.mock_calls)
             self.assertEqual(
-                [call.__getitem__("-LIST_2-"), call.__getitem__().get()], main_winfow_info.window.mock_calls
+                [call.__getitem__("-LIST_2-"), call.__getitem__().get()], main_window_info.window.mock_calls
             )
 
             mute_word_list = []
@@ -50,8 +50,8 @@ class TestMuteWordUnmute(unittest.TestCase):
                 if i in index_list:
                     mute_word_list.append(mute_word)
             if not mute_word_list:
-                main_winfow_info.mute_word_db.assert_not_called()
-                main_winfow_info.config.assert_not_called()
+                main_window_info.mute_word_db.assert_not_called()
+                main_window_info.config.assert_not_called()
                 mock_muter.assert_not_called()
                 mock_update_mute_word_table.assert_not_called()
                 return
@@ -59,11 +59,11 @@ class TestMuteWordUnmute(unittest.TestCase):
             mute_word_str = mute_word_list[0][1]
             if is_valid_muter:
                 self.assertEqual(
-                    [call(main_winfow_info.config), call().unmute_keyword(mute_word_str)], mock_muter.mock_calls
+                    [call(main_window_info.config), call().unmute_keyword(mute_word_str)], mock_muter.mock_calls
                 )
             else:
-                self.assertEqual([call(main_winfow_info.config)], mock_muter.mock_calls)
-                main_winfow_info.mute_word_db.assert_not_called()
+                self.assertEqual([call(main_window_info.config)], mock_muter.mock_calls)
+                main_window_info.mute_word_db.assert_not_called()
                 self.assertEqual([call()], mock_update_mute_word_table.mock_calls)
                 return
 

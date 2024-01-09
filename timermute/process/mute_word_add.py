@@ -12,8 +12,8 @@ logger.setLevel(INFO)
 
 
 class MuteWordAdd(Base):
-    def __init__(self, main_winfow_info: MainWindowInfo) -> None:
-        super().__init__(main_winfow_info)
+    def __init__(self, main_window_info: MainWindowInfo) -> None:
+        super().__init__(main_window_info)
 
     def run(self) -> Result:
         # "-MUTE_WORD_ADD-"
@@ -27,7 +27,7 @@ class MuteWordAdd(Base):
             # デフォルトでミュートする
             logger.info("Mute by mute_keyword -> start")
             logger.info(f"Target keyword is '{mute_word_str}'.")
-            config = self.main_winfow_info.config
+            config = self.main_window_info.config
             muter = Muter(config)
             r_dict = muter.mute_keyword(mute_word_str)
             print(r_dict)
@@ -43,7 +43,7 @@ class MuteWordAdd(Base):
                 # 解除タイマーセット
                 # interval = 10  # DEBUG
                 interval = interval_min * 60  # sec
-                timer = MuteWordUnmuteTimer(self.main_winfow_info, muter, interval, mute_word_str)
+                timer = MuteWordUnmuteTimer(self.main_window_info, muter, interval, mute_word_str)
                 timer.start()
 
                 logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_word_str}'.")
@@ -52,7 +52,7 @@ class MuteWordAdd(Base):
             # DB追加
             logger.info("DB upsert -> start")
             record = MuteWord(mute_word_str, "muted", now(), now(), unmuted_at)
-            self.main_winfow_info.mute_word_db.upsert(record)
+            self.main_window_info.mute_word_db.upsert(record)
             logger.info("DB upsert -> done")
         except Exception as e:
             raise e

@@ -9,17 +9,17 @@ from timermute.util import Result
 
 
 class Base(metaclass=ABCMeta):
-    main_winfow_info: MainWindowInfo
+    main_window_info: MainWindowInfo
 
-    def __init__(self, main_winfow_info: MainWindowInfo) -> None:
-        if not isinstance(main_winfow_info, MainWindowInfo):
-            raise ValueError("main_winfow_info must be MainWindowInfo.")
-        self.main_winfow_info = main_winfow_info
+    def __init__(self, main_window_info: MainWindowInfo) -> None:
+        if not isinstance(main_window_info, MainWindowInfo):
+            raise ValueError("main_window_info must be MainWindowInfo.")
+        self.main_window_info = main_window_info
 
     def update_mute_word_table(self) -> Result:
         """mute_word テーブルを更新する"""
-        window: sg.Window = self.main_winfow_info.window
-        mute_word_db: MuteWordDB = self.main_winfow_info.mute_word_db
+        window: sg.Window = self.main_window_info.window
+        mute_word_db: MuteWordDB = self.main_window_info.mute_word_db
 
         # ミュートワード取得
         # 更新日時で降順ソートする
@@ -39,8 +39,8 @@ class Base(metaclass=ABCMeta):
 
     def update_mute_user_table(self) -> Result:
         """mute_user テーブルを更新する"""
-        window: sg.Window = self.main_winfow_info.window
-        mute_user_db: MuteUserDB = self.main_winfow_info.mute_user_db
+        window: sg.Window = self.main_window_info.window
+        mute_user_db: MuteUserDB = self.main_window_info.mute_user_db
 
         # ミュートユーザー取得
         # 更新日時で降順ソートする

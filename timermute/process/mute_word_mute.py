@@ -11,16 +11,16 @@ logger.setLevel(INFO)
 
 
 class MuteWordMute(Base):
-    def __init__(self, main_winfow_info: MainWindowInfo) -> None:
-        super().__init__(main_winfow_info)
+    def __init__(self, main_window_info: MainWindowInfo) -> None:
+        super().__init__(main_window_info)
 
     def run(self) -> Result:
         # "-MUTE_WORD_MUTE-"
         logger.info("MUTE_WORD_MUTE -> start")
         # 選択ミュートワードを取得
         logger.info("Getting selected mute word -> start")
-        index_list = self.main_winfow_info.values["-LIST_1-"]
-        mute_word_list_all = self.main_winfow_info.window["-LIST_1-"].get()
+        index_list = self.main_window_info.values["-LIST_1-"]
+        mute_word_list_all = self.main_window_info.window["-LIST_1-"].get()
         mute_word_list = []
         for i, mute_word in enumerate(mute_word_list_all):
             if i in index_list:
@@ -35,7 +35,7 @@ class MuteWordMute(Base):
         try:
             # Muter インスタンスを作成し、選択ワードをミュートする
             logger.info("Mute by mute_keyword -> start")
-            config = self.main_winfow_info.config
+            config = self.main_window_info.config
             muter = Muter(config)
             for mute_word in mute_word_list:
                 # 選択ワードをミュート
@@ -54,7 +54,7 @@ class MuteWordMute(Base):
                     # 解除タイマーセット
                     # interval = 10  # DEBUG
                     interval = interval_min * 60  # sec
-                    timer = MuteWordUnmuteTimer(self.main_winfow_info, muter, interval, mute_word_str)
+                    timer = MuteWordUnmuteTimer(self.main_window_info, muter, interval, mute_word_str)
                     timer.start()
 
                     logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_word_str}'.")
@@ -62,7 +62,7 @@ class MuteWordMute(Base):
 
                 # DB追加
                 logger.info("DB update -> start")
-                self.main_winfow_info.mute_word_db.mute(mute_word_str, unmuted_at)
+                self.main_window_info.mute_word_db.mute(mute_word_str, unmuted_at)
                 logger.info("DB update -> done")
             logger.info("Mute by mute_keyword -> done")
         except Exception as e:

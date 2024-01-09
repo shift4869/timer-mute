@@ -12,8 +12,8 @@ logger.setLevel(INFO)
 
 
 class MuteUserAdd(Base):
-    def __init__(self, main_winfow_info: MainWindowInfo) -> None:
-        super().__init__(main_winfow_info)
+    def __init__(self, main_window_info: MainWindowInfo) -> None:
+        super().__init__(main_window_info)
 
     def run(self) -> Result:
         # "-MUTE_USER_ADD-"
@@ -26,7 +26,7 @@ class MuteUserAdd(Base):
         try:
             logger.info("Mute by mute_user -> start")
             logger.info(f"Target user is '{mute_user_str}'.")
-            config = self.main_winfow_info.config
+            config = self.main_window_info.config
             muter = Muter(config)
             r_dict = muter.mute_user(mute_user_str)
             print(r_dict)
@@ -42,7 +42,7 @@ class MuteUserAdd(Base):
                 # 解除タイマーセット
                 # interval = 10  # DEBUG
                 interval = interval_min * 60  # sec
-                timer = MuteUserUnmuteTimer(self.main_winfow_info, muter, interval, mute_user_str)
+                timer = MuteUserUnmuteTimer(self.main_window_info, muter, interval, mute_user_str)
                 timer.start()
 
                 logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_user_str}'.")
@@ -51,7 +51,7 @@ class MuteUserAdd(Base):
             # DB追加
             logger.info("DB upsert -> start")
             record = MuteUser(mute_user_str, "muted", now(), now(), unmuted_at)
-            self.main_winfow_info.mute_user_db.upsert(record)
+            self.main_window_info.mute_user_db.upsert(record)
             logger.info("DB upsert -> start")
         except Exception as e:
             raise e
