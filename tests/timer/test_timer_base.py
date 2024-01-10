@@ -17,7 +17,7 @@ class TestTimerBase(unittest.TestCase):
         self.assertEqual(interval, instance._interval)
         self.assertEqual(func, instance._func)
         self.assertEqual(args, instance._args)
-        self.assertEqual([call(interval, func, args), call().setDaemon(True)], mock_timer.mock_calls)
+        self.assertEqual([call(interval, func, args)], mock_timer.mock_calls)
 
     def test_start(self):
         self.enterContext(patch("timermute.timer.timer.logger"))
@@ -27,7 +27,7 @@ class TestTimerBase(unittest.TestCase):
         args = {"key": "value"}
         instance = TimerBase(interval, func, args)
         actual = instance.start()
-        self.assertEqual([call(interval, func, args), call().setDaemon(True), call().start()], mock_timer.mock_calls)
+        self.assertEqual([call(interval, func, args), call().start()], mock_timer.mock_calls)
         self.assertEqual(mock_timer.return_value, actual)
 
 

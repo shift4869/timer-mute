@@ -25,7 +25,7 @@ class TimerBase:
         self._func = func
         self._args = args
         self._thread = threading.Timer(self._interval, self._func, self._args)
-        self._thread.setDaemon(True)
+        self._thread.daemon = True
 
     def start(self) -> threading.Thread:
         logger.info(f"Unmute Timer set.")
@@ -92,7 +92,7 @@ class MuteUserUnmuteTimer(TimerBase):
         self.screen_name = target_screen_name
         super().__init__(interval, self.run, ())
 
-    def update_mute_user_table(self) -> None:
+    def update_mute_user_table(self) -> Result:
         """mute_user テーブルを更新する"""
         window: sg.Window = self.main_window_info.window
         mute_user_db: MuteUserDB = self.main_window_info.mute_user_db
@@ -111,6 +111,7 @@ class MuteUserUnmuteTimer(TimerBase):
         window["-LIST_3-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_user_list_2]
         window["-LIST_4-"].update(values=table_data)
+        return Result.SUCCESS
 
     def run(self) -> None:
         logger.info("Timer run -> start")
@@ -131,6 +132,7 @@ class MuteUserUnmuteTimer(TimerBase):
             pass
         self.update_mute_user_table()
         logger.info("Timer run -> done")
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":
