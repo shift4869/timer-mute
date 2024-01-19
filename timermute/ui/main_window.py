@@ -9,18 +9,20 @@ import PySimpleGUI as sg
 from timermute.db.mute_user_db import MuteUserDB
 from timermute.db.mute_word_db import MuteWordDB
 from timermute.muter.muter import Muter
-from timermute.process import mute_user_add, mute_user_del, mute_user_mute, mute_user_unmute, mute_word_add, mute_word_del, mute_word_mute, mute_word_unmute
+from timermute.process import mute_user_add, mute_user_del, mute_user_mute, mute_user_unmute, mute_word_add
+from timermute.process import mute_word_del, mute_word_mute, mute_word_unmute
 from timermute.process.base import Base as ProcessBase
 from timermute.timer.restore import MuteUserRestoreTimer
 from timermute.ui.main_window_info import MainWindowInfo
+from timermute.util import Result
 
 
 class MainWindow:
     window: sg.Window = None
-    values: list = []
-    mute_word_db: MuteWordDB
-    mute_user_db: MuteUserDB
-    config: configparser.ConfigParser
+    values: dict = {}
+    mute_word_db: MuteWordDB = None
+    mute_user_db: MuteUserDB = None
+    config: configparser.ConfigParser = None
 
     def __init__(self) -> None:
         self.mute_word_db = MuteWordDB()
@@ -64,7 +66,6 @@ class MainWindow:
         if self.config["on_load"].getboolean("restore_timer"):
             main_window_info = self._get_main_window_info()
             MuteUserRestoreTimer.set(main_window_info)
-            pass
 
         # UI表示更新
         self._update_mute_word_table()
@@ -169,11 +170,20 @@ class MainWindow:
             [sg.Text("ミュートアカウント", size=(50, 1))],
             [t3, sg.Column(button_list2, vertical_alignment="top"), t4],
             [sg.Text("ログ", size=(50, 1))],
-            [sg.Multiline(key="-OUTPUT-", size=(155, 8), auto_refresh=True, autoscroll=True, reroute_stdout=True, reroute_stderr=True)],
+            [
+                sg.Multiline(
+                    key="-OUTPUT-",
+                    size=(155, 8),
+                    auto_refresh=True,
+                    autoscroll=True,
+                    reroute_stdout=True,
+                    reroute_stderr=True,
+                )
+            ],
         ]
         return layout
 
-    def _update_mute_word_table(self) -> None:
+    def _update_mute_word_table(self) -> Result:
         """mute_word テーブルを更新する"""
         window: sg.Window = self.window
         mute_word_db: MuteWordDB = self.mute_word_db
@@ -192,8 +202,9 @@ class MainWindow:
         window["-LIST_1-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_word_list_2]
         window["-LIST_2-"].update(values=table_data)
+        return Result.SUCCESS
 
-    def _update_mute_user_table(self) -> None:
+    def _update_mute_user_table(self) -> Result:
         """mute_user テーブルを更新する"""
         window: sg.Window = self.window
         mute_user_db: MuteUserDB = self.mute_user_db
@@ -212,6 +223,7 @@ class MainWindow:
         window["-LIST_3-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_user_list_2]
         window["-LIST_4-"].update(values=table_data)
+        return Result.SUCCESS
 
     def _get_main_window_info(self) -> MainWindowInfo:
         main_window_info = MainWindowInfo(
@@ -223,7 +235,7 @@ class MainWindow:
         )
         return main_window_info
 
-    def run(self) -> None:
+    def run(self) -> Result:
         logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
         # for name in logging.root.manager.loggerDict:
         #     # 自分以外のすべてのライブラリのログ出力を抑制
@@ -256,6 +268,7 @@ class MainWindow:
 
         # ウィンドウ終了処理
         self.window.close()
+        return Result.SUCCESS
 
 
 if __name__ == "__main__":
