@@ -10,13 +10,29 @@ class Result(Enum):
     FAILED = auto()
 
 
-def now():
+def now() -> str:
+    """現在時刻を所定のフォーマットで返す
+
+    Returns:
+        str: destination_format = "%Y-%m-%d %H:%M:%S" 形式の現在時刻
+    """
     destination_format = "%Y-%m-%d %H:%M:%S"
     now_datetime = datetime.now()
     return now_datetime.strftime(destination_format)
 
 
 def get_future_datetime(seconds: int) -> str:
+    """未来日時刻を所定のフォーマットで返す
+
+    現在時刻から seconds [sec]経過した後の時刻を返す
+
+    Args:
+        seconds (int): 未来日を指定する秒[sec]
+                       負の値も受け付けるが非推奨
+
+    Returns:
+        str: "%Y-%m-%d %H:%M:%S" 形式の時刻を表す文字列
+    """
     destination_format = "%Y-%m-%d %H:%M:%S"
     now_datetime = datetime.now()
     delta = timedelta(seconds=seconds)
@@ -42,12 +58,14 @@ def popup_get_text(
     relative_location=(None, None),
     image=None,
     modal=True,
-):
+) -> str | None:
     """sg.popup_get_text のラッパー
 
-    Notes:
-        テキストボックスにデフォルトでフォーカスをセットする
-        image はサポートしていないので利用するときは追加すること
+    テキストボックスにデフォルトでフォーカスをセットする
+    image はサポートしていないので利用するときは追加すること
+
+    Returns:
+        str | None: ユーザーが入力したテキスト, キャンセル時は None
     """
     layout = [
         [sg.Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)],
@@ -80,7 +98,7 @@ def popup_get_text(
     if button != "Ok":
         return None
     else:
-        path = values["-INPUT-"]
+        path = str(values["-INPUT-"])
         return path
 
 
@@ -103,11 +121,22 @@ def popup_get_interval(
     image=None,
     modal=True,
 ) -> int | None:
+    """interval をユーザーに問い合わせる
+
+    ユーザーは以下を選択できる
+        ・no limit: 指定なし. interval 無限を表す. 返り値としては None.
+        ・{int} hours: 1時間単位のプリセット. 返り値は interval[min].
+        ・{int} [unit]: 指定数値かつ指定単位. 返り値は interval[min].
+
+    Returns:
+        int | None: ユーザーが指定した interval[min],
+                    no limit 指定時、またはキャンセル時は None を返す
+    """
     message = message or "At what time will it be unmuted?"
     combo_list = ["minutes later", "hours later", "days later", "weeks later", "months later", "years later"]
     radio_column_layout = sg.Column(
         [
-            [sg.Radio("no limit", 1, key="-R0-")],
+            [sg.Radio("no limit", 1, key="-R0-", default=True)],
             [sg.Radio("1 hours", 1, key="-R1-")],
             [sg.Radio("2 hours", 1, key="-R2-")],
             [sg.Radio("6 hours", 1, key="-R3-")],
@@ -116,7 +145,11 @@ def popup_get_interval(
             [sg.Input("", key="-R6-", size=(15, 2)), sg.Combo(combo_list, combo_list[1], key="-R7-", size=(10, 2))],
         ]
     )
-    layout = [[sg.Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)], [radio_column_layout], [sg.Button("Submit", size=(6, 1), bind_return_key=True), sg.Button("Cancel", size=(6, 1))]]
+    layout = [
+        [sg.Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)],
+        [radio_column_layout],
+        [sg.Button("Submit", size=(6, 1), bind_return_key=True), sg.Button("Cancel", size=(6, 1))],
+    ]
 
     window = sg.Window(
         title=title or message,
@@ -166,7 +199,7 @@ def popup_get_interval(
             return None
         if not re.search(r"^[0-9]*$", interval_str):
             return None
-        interval_num = float(interval_str)
+        interval_num = int(interval_str)
         match unit:
             case "minutes later":
                 interval_minutes = interval_num  # min
