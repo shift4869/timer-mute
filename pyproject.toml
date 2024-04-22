@@ -7,21 +7,31 @@ license = "MIT License"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-coverage = "^7.3.2"
-isort = "^5.12.0"
+coverage = "^7.4.4"
+freezegun = "^1.4.0"
+isort = "^5.13.2"
 mock = "^5.0.1"
 pycodestyle = "^2.11.1"
 pysimplegui = "^4.60.5"
-python = ">=3.11,<4"
-sqlalchemy = "^2.0.23"
-twitter-api-client = "^0.10.11"
+python = ">=3.12,<4"
+ruff = "^0.1.15"
+sqlalchemy = "^2.0.29"
+twitter-api-client = "^0.10.22"
+
+[tool.poetry.dev-dependencies]
 
 [tool.isort]
+line_length = 119
 multi_line_output = 9
-line_length = 256
 
 [tool.ruff]
-organizeImports = false
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".git",
+]
+line-length = 119
 
 [tool.ruff.lint]
 ignore = ["F401", "F541", "F841"]
