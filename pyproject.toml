@@ -7,16 +7,16 @@ license = "MIT License"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-coverage = "^7.4.0"
+coverage = "^7.4.4"
 freezegun = "^1.4.0"
 isort = "^5.13.2"
 mock = "^5.0.1"
 pycodestyle = "^2.11.1"
 pysimplegui = "^4.60.5"
-python = ">=3.11,<4"
-ruff = "^0.1.11"
-sqlalchemy = "^2.0.25"
-twitter-api-client = "^0.10.16"
+python = ">=3.12,<4"
+ruff = "^0.1.15"
+sqlalchemy = "^2.0.29"
+twitter-api-client = "^0.10.22"
 
 [tool.poetry.dev-dependencies]
 
