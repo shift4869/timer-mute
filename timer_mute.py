@@ -1,7 +1,7 @@
 import logging.config
 from logging import INFO, getLogger
 
-from timermute.ui.MainWindow import MainWindow
+from timermute.ui.main_window import MainWindow
 
 logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
 for name in logging.root.manager.loggerDict:
