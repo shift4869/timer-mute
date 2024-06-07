@@ -1,24 +1,27 @@
-[tool.poetry]
-name = "timermute"
+[project]
+name = "timer-mute"
 version = "0.1.0"
-description = ""
-authors = ["shift <fantasy_world4423-git@yahoo.co.jp>"]
-license = "MIT License"
+description = "timer mute"
+authors = [
+    { name = "shift" }
+]
+dependencies = [
+    "coverage>=7.5.3",
+    "freezegun>=1.5.1",
+    "isort>=5.13.2",
+    "mock>=5.1.0",
+    "pycodestyle>=2.11.1",
+    "pysimplegui==4.60.5",
+    "ruff>=0.4.8",
+    "sqlalchemy>=2.0.30",
+    "twitter-api-client>=0.10.22",
+]
 readme = "README.md"
+requires-python = ">= 3.12"
 
-[tool.poetry.dependencies]
-coverage = "^7.4.4"
-freezegun = "^1.4.0"
-isort = "^5.13.2"
-mock = "^5.0.1"
-pycodestyle = "^2.11.1"
-pysimplegui = "^4.60.5"
-python = ">=3.12,<4"
-ruff = "^0.1.15"
-sqlalchemy = "^2.0.29"
-twitter-api-client = "^0.10.22"
-
-[tool.poetry.dev-dependencies]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.isort]
 line_length = 119
@@ -26,16 +29,30 @@ multi_line_output = 9
 
 [tool.ruff]
 exclude = [
+    "__pycache__",
+    ".coveragerc",
+    ".git",
     ".venv",
     "venv",
-    "__pycache__",
-    ".git",
 ]
 line-length = 119
 
 [tool.ruff.lint]
+fixable = ["ALL"]
+select = ["E", "F"]
 ignore = ["F401", "F541", "F841"]
+preview = true
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.ruff.format]
+preview = true
+quote-style = "double"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/timer_mute"]

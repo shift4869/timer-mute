@@ -121,6 +121,7 @@ log*.txt*
 *.xcf
 *.pdf
 *.bat
+*.vbs
 *.txt
 !requirements.txt
 /sample
