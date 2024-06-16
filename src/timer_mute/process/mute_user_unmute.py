@@ -28,7 +28,7 @@ class MuteUserUnmute(Base):
             logger.info("Selected muted user is empty.")
             logger.info("Getting selected mute user -> done")
             logger.info("MUTE_WORD_UNMUTE -> done")
-            return Result.FAILED
+            return Result.failed
         logger.info("Getting selected muted user -> start")
 
         try:
@@ -55,7 +55,7 @@ class MuteUserUnmute(Base):
             # UI表示更新
             self.update_mute_user_table()
         logger.info("MUTE_USER_UNMUTE -> done")
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

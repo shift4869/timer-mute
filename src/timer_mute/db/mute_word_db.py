@@ -43,7 +43,7 @@ class MuteWordDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success
 
     def delete(self, keyword: str) -> Result:
         if not isinstance(keyword, str):
@@ -57,7 +57,7 @@ class MuteWordDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success
 
     def mute(self, keyword: str, unmuted_at: str) -> Result:
         if not isinstance(keyword, str):
@@ -79,7 +79,7 @@ class MuteWordDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success
 
     def unmute(self, keyword: str) -> Result:
         if not isinstance(keyword, str):
@@ -94,4 +94,4 @@ class MuteWordDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success

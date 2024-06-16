@@ -16,7 +16,7 @@ class RestoreTimerBase:
 
     @classmethod
     def set(self, main_window_info: MainWindowInfo) -> Result:
-        return Result.SUCCESS
+        return Result.success
 
 
 class MuteWordRestoreTimer(RestoreTimerBase):
@@ -56,7 +56,7 @@ class MuteWordRestoreTimer(RestoreTimerBase):
             else:
                 timer = MuteWordUnmuteTimer(main_window_info, muter, interval, target_keyword)
                 timer.start()
-        return Result.SUCCESS
+        return Result.success
 
 
 class MuteUserRestoreTimer(RestoreTimerBase):
@@ -96,7 +96,7 @@ class MuteUserRestoreTimer(RestoreTimerBase):
             else:
                 timer = MuteUserUnmuteTimer(main_window_info, muter, interval, target_screen_name)
                 timer.start()
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

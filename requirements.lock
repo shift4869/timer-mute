@@ -41,7 +41,8 @@ mock==5.1.0
     # via timer-mute
 nest-asyncio==1.6.0
     # via twitter-api-client
-orjson==3.10.3
+orjson==3.10.5
+    # via timer-mute
     # via twitter-api-client
 pycodestyle==2.11.1
     # via timer-mute

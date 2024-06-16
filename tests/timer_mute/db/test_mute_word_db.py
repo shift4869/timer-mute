@@ -46,7 +46,7 @@ class TestMuteWordDB(unittest.TestCase):
 
         # INSERT
         actual = self.instance.upsert(mute_word_record)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_word_list(n + 1)
         self.assertEqual(expect, actual)
@@ -56,7 +56,7 @@ class TestMuteWordDB(unittest.TestCase):
         mute_word_record.status = "muted"
         mute_word_record.id = -1
         actual = self.instance.upsert(mute_word_record)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_word_list(n + 1)
         expect[0].status = "muted"
@@ -71,7 +71,7 @@ class TestMuteWordDB(unittest.TestCase):
         mute_word_record = self._get_mute_word(n - 1)
 
         actual = self.instance.delete(mute_word_record.keyword)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_word_list(n - 1)
         self.assertEqual(expect, actual)
@@ -89,7 +89,7 @@ class TestMuteWordDB(unittest.TestCase):
 
         mute_word_record = self._get_mute_word(0)
         actual = self.instance.mute(mute_word_record.keyword, new_unmuted_at)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_word_list(n)
         expect[0].status = "muted"
@@ -98,7 +98,7 @@ class TestMuteWordDB(unittest.TestCase):
         self.assertEqual(expect, actual)
 
         actual = self.instance.mute(mute_word_record.keyword, "")
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_word_list(n)
         expect[0].status = "muted"
@@ -120,7 +120,7 @@ class TestMuteWordDB(unittest.TestCase):
 
         mute_word_record = self._get_mute_word(0)
         actual = self.instance.unmute(mute_word_record.keyword)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_word_list(n)
         expect[0].status = "unmuted"

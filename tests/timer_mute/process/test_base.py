@@ -16,7 +16,7 @@ class ConcreteBase(Base):
         super().__init__(main_window_info)
 
     def run(self) -> Result:
-        return Result.SUCCESS
+        return Result.success
 
 
 class TestBase(unittest.TestCase):
@@ -37,7 +37,7 @@ class TestBase(unittest.TestCase):
         main_window_info.mute_word_db.select.side_effect = lambda: [r]
         instance = ConcreteBase(main_window_info)
         actual = instance.update_mute_word_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.mute_word_db.select(),
@@ -55,7 +55,7 @@ class TestBase(unittest.TestCase):
         r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
         main_window_info.mute_word_db.select.side_effect = lambda: [r]
         actual = instance.update_mute_word_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.mute_word_db.select(),
@@ -77,7 +77,7 @@ class TestBase(unittest.TestCase):
         main_window_info.mute_user_db.select.side_effect = lambda: [r]
         instance = ConcreteBase(main_window_info)
         actual = instance.update_mute_user_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.mute_user_db.select(),
@@ -95,7 +95,7 @@ class TestBase(unittest.TestCase):
         r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
         main_window_info.mute_user_db.select.side_effect = lambda: [r]
         actual = instance.update_mute_user_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.mute_user_db.select(),
@@ -111,7 +111,7 @@ class TestBase(unittest.TestCase):
         main_window_info = MagicMock(spec=MainWindowInfo)
         instance = ConcreteBase(main_window_info)
         actual = instance.run()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
 
 
 if __name__ == "__main__":

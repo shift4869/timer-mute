@@ -46,7 +46,7 @@ class TestMuteUserDB(unittest.TestCase):
 
         # INSERT
         actual = self.instance.upsert(mute_user_record)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_user_list(n + 1)
         self.assertEqual(expect, actual)
@@ -56,7 +56,7 @@ class TestMuteUserDB(unittest.TestCase):
         mute_user_record.status = "muted"
         mute_user_record.id = -1
         actual = self.instance.upsert(mute_user_record)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_user_list(n + 1)
         expect[0].status = "muted"
@@ -71,7 +71,7 @@ class TestMuteUserDB(unittest.TestCase):
         mute_user_record = self._get_mute_user(n - 1)
 
         actual = self.instance.delete(mute_user_record.screen_name)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_user_list(n - 1)
         self.assertEqual(expect, actual)
@@ -89,7 +89,7 @@ class TestMuteUserDB(unittest.TestCase):
 
         mute_user_record = self._get_mute_user(0)
         actual = self.instance.mute(mute_user_record.screen_name, new_unmuted_at)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_user_list(n)
         expect[0].status = "muted"
@@ -98,7 +98,7 @@ class TestMuteUserDB(unittest.TestCase):
         self.assertEqual(expect, actual)
 
         actual = self.instance.mute(mute_user_record.screen_name, "")
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_user_list(n)
         expect[0].status = "muted"
@@ -120,7 +120,7 @@ class TestMuteUserDB(unittest.TestCase):
 
         mute_user_record = self._get_mute_user(0)
         actual = self.instance.unmute(mute_user_record.screen_name)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = self.instance.select()
         expect = self._get_mute_user_list(n)
         expect[0].status = "unmuted"

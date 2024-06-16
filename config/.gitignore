@@ -1,5 +1,5 @@
 # user
 *.ini
-!config_example.ini
 *.txt
 *.json
+!config_example.json

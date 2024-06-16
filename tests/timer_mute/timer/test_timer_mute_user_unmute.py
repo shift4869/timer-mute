@@ -40,7 +40,7 @@ class TestTimerMuteUserUnmute(unittest.TestCase):
         main_window_info.mute_user_db.select.side_effect = lambda: [r]
         instance = MuteUserUnmuteTimer(main_window_info, muter, interval, target_screen_name)
         actual = instance.update_mute_user_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.mute_user_db.select(),
@@ -58,7 +58,7 @@ class TestTimerMuteUserUnmute(unittest.TestCase):
         r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
         main_window_info.mute_user_db.select.side_effect = lambda: [r]
         actual = instance.update_mute_user_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.mute_user_db.select(),
@@ -100,9 +100,9 @@ class TestTimerMuteUserUnmute(unittest.TestCase):
 
         Params = namedtuple("Params", ["is_valid_unmute_user", "is_valid_unmute", "result"])
         params_list = [
-            Params(True, True, Result.SUCCESS),
-            Params(True, False, Result.SUCCESS),
-            Params(False, True, Result.SUCCESS),
+            Params(True, True, Result.success),
+            Params(True, False, Result.success),
+            Params(False, True, Result.success),
         ]
         for params in params_list:
             pre_run(*params[:-1])

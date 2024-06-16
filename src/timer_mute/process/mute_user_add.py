@@ -21,7 +21,7 @@ class MuteUserAdd(Base):
         # ミュートユーザーをユーザーに問い合せる
         mute_user_str = popup_get_text("mute user input.")
         if not mute_user_str:
-            return Result.FAILED
+            return Result.failed
 
         try:
             logger.info("Mute by mute_user -> start")
@@ -58,7 +58,7 @@ class MuteUserAdd(Base):
         finally:
             self.update_mute_user_table()
         logger.info("MUTE_USER_ADD -> start")
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ class MuteWordDel(Base):
             logger.info(f"Selected mute word is empty.")
             logger.info("Getting selected mute word -> done")
             logger.info("MUTE_WORD_DEL -> done")
-            return Result.FAILED
+            return Result.failed
         logger.info("Getting selected mute word -> done")
 
         try:
@@ -43,7 +43,7 @@ class MuteWordDel(Base):
         finally:
             self.update_mute_word_table()
         logger.info("MUTE_WORD_DEL -> done")
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

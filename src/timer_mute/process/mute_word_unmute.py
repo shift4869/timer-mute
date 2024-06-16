@@ -28,7 +28,7 @@ class MuteWordUnmute(Base):
             logger.info("Selected muted word is empty.")
             logger.info("Getting selected mute word -> done")
             logger.info("MUTE_WORD_UNMUTE -> done")
-            return Result.FAILED
+            return Result.failed
         logger.info("Getting selected muted word -> done")
 
         try:
@@ -54,7 +54,7 @@ class MuteWordUnmute(Base):
         finally:
             self.update_mute_word_table()
         logger.info("MUTE_WORD_UNMUTE -> done")
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

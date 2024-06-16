@@ -94,9 +94,9 @@ class TestMuteUserMute(unittest.TestCase):
 
         Params = namedtuple("Params", ["index_list", "mute_user_list_all", "interval_min", "is_valid_muter", "result"])
         params_list = [
-            Params([0], [(0, "mute_user_0")], 1, True, Result.SUCCESS),
-            Params([0], [(0, "mute_user_0")], 0, True, Result.SUCCESS),
-            Params([], [(0, "mute_user_0")], 1, True, Result.FAILED),
+            Params([0], [(0, "mute_user_0")], 1, True, Result.success),
+            Params([0], [(0, "mute_user_0")], 0, True, Result.success),
+            Params([], [(0, "mute_user_0")], 1, True, Result.failed),
             Params([0], [(0, "mute_user_0")], 1, False, ValueError),
         ]
         for params in params_list:

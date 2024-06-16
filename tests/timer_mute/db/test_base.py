@@ -18,16 +18,16 @@ class ConcreteBase(Base):
         return ["select()"]
 
     def upsert(self, record: ModelBase) -> Result:
-        return Result.SUCCESS
+        return Result.success
 
     def delete(self, key_screen_name: str) -> Result:
-        return Result.SUCCESS
+        return Result.success
 
     def mute(self, key_screen_name: str, unmuted_at: str) -> Result:
-        return Result.SUCCESS
+        return Result.success
 
     def unmute(self, key_screen_name: str) -> Result:
-        return Result.SUCCESS
+        return Result.success
 
 
 class TestBase(unittest.TestCase):
@@ -59,10 +59,10 @@ class TestBase(unittest.TestCase):
     def test_abstractmethod(self):
         instance = ConcreteBase()
         self.assertEqual(["select()"], instance.select())
-        self.assertEqual(Result.SUCCESS, instance.upsert("record"))
-        self.assertEqual(Result.SUCCESS, instance.delete("key_screen_name"))
-        self.assertEqual(Result.SUCCESS, instance.mute("key_screen_name", "unmuted_at"))
-        self.assertEqual(Result.SUCCESS, instance.unmute("key_screen_name"))
+        self.assertEqual(Result.success, instance.upsert("record"))
+        self.assertEqual(Result.success, instance.delete("key_screen_name"))
+        self.assertEqual(Result.success, instance.mute("key_screen_name", "unmuted_at"))
+        self.assertEqual(Result.success, instance.unmute("key_screen_name"))
 
 
 if __name__ == "__main__":

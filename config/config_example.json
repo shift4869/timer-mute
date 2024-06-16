@@ -1,0 +1,15 @@
+{
+    "twitter_api_client": {
+        "ct0": "dummy_ct0",
+        "auth_token": "dummy_auth_token",
+        "target_screen_name": "dummy_target_screen_name"
+    },
+    "on_load": {
+        "prepare_session": true,
+        "restore_timer": true
+    },
+    "notification": {
+        "prepare_session": true,
+        "restore_timer": true
+    }
+}

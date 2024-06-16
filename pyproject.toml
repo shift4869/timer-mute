@@ -10,6 +10,7 @@ dependencies = [
     "freezegun>=1.5.1",
     "isort>=5.13.2",
     "mock>=5.1.0",
+    "orjson>=3.10.5",
     "pycodestyle>=2.11.1",
     "pysimplegui==4.60.5",
     "ruff>=0.4.8",

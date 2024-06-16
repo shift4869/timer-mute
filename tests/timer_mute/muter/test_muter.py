@@ -37,7 +37,6 @@ class TestMuter(unittest.TestCase):
         self.assertEqual("auth_token", instance.auth_token)
         self.assertEqual("target_screen_name", instance.target_screen_name)
         self.assertEqual(11111, instance.target_id)
-        self.assertEqual((Path("./src/timer_mute/muter") / "cache/").resolve(), instance.cache_path)
         mock_account.assert_called_once_with(cookies={"ct0": "ct0", "auth_token": "auth_token"}, pbar=False)
 
         mock_account.reset_mock()

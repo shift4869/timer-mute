@@ -6,8 +6,8 @@ import PySimpleGUI as sg
 
 
 class Result(Enum):
-    SUCCESS = auto()
-    FAILED = auto()
+    success = auto()
+    failed = auto()
 
 
 def now() -> str:
@@ -165,9 +165,6 @@ def popup_get_interval(
         modal=modal,
         font=font,
     )
-
-    # window["-INPUT-"].set_focus(True)
-
     button, values = window.read()
     window.close()
     del window
@@ -175,21 +172,6 @@ def popup_get_interval(
         return None
 
     interval_minutes = -1
-    radio_button_select_list = [
-        values.get("-R1-", False),
-        values.get("-R2-", False),
-        values.get("-R3-", False),
-        values.get("-R4-", False),
-        values.get("-R5-", False),
-    ]
-    radio_button_value = [1, 2, 6, 12, 24]
-    if values.get("-R0-", False):
-        return None
-    if any(radio_button_select_list):
-        for i, v in enumerate(radio_button_select_list):
-            if v:
-                interval_minutes = radio_button_value[i] * 60  # min
-                return interval_minutes
     if values.get("-R6-", "") != "" and values.get("-R7-", "") in combo_list:
         interval_str = values.get("-R6-", "")
         unit = values.get("-R7-", "")
@@ -214,6 +196,23 @@ def popup_get_interval(
             case _:
                 return None
         return interval_minutes
+
+    if values.get("-R0-", False):
+        return None
+
+    radio_button_select_list = [
+        values.get("-R1-", False),
+        values.get("-R2-", False),
+        values.get("-R3-", False),
+        values.get("-R4-", False),
+        values.get("-R5-", False),
+    ]
+    radio_button_value = [1, 2, 6, 12, 24]
+    if any(radio_button_select_list):
+        for i, v in enumerate(radio_button_select_list):
+            if v:
+                interval_minutes = radio_button_value[i] * 60  # min
+                return interval_minutes
     return None
 
 

@@ -1,4 +1,3 @@
-import configparser
 from dataclasses import dataclass
 
 import PySimpleGUI as sg
@@ -13,7 +12,7 @@ class MainWindowInfo:
     values: dict
     mute_word_db: MuteWordDB
     mute_user_db: MuteUserDB
-    config: configparser.ConfigParser
+    config: dict
 
     def __post_init__(self):
         if not isinstance(self.window, sg.Window):
@@ -24,8 +23,8 @@ class MainWindowInfo:
             raise ValueError("mute_word_db must be MuteWordDB.")
         if not isinstance(self.mute_user_db, MuteUserDB):
             raise ValueError("mute_user_db must be MuteUserDB.")
-        if not isinstance(self.config, configparser.ConfigParser):
-            raise ValueError("config must be configparser.ConfigParser.")
+        if not isinstance(self.config, dict):
+            raise ValueError("config must be dict.")
 
 
 if __name__ == "__main__":

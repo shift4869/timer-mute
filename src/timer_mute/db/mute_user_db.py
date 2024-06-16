@@ -43,7 +43,7 @@ class MuteUserDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success
 
     def delete(self, key_screen_name: str) -> Result:
         if not isinstance(key_screen_name, str):
@@ -57,7 +57,7 @@ class MuteUserDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success
 
     def mute(self, key_screen_name: str, unmuted_at: str) -> Result:
         if not isinstance(key_screen_name, str):
@@ -79,7 +79,7 @@ class MuteUserDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success
 
     def unmute(self, key_screen_name: str) -> Result:
         if not isinstance(key_screen_name, str):
@@ -95,4 +95,4 @@ class MuteUserDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success

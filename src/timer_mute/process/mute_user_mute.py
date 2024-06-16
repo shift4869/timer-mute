@@ -29,7 +29,7 @@ class MuteUserMute(Base):
             logger.info("Selected mute user is empty.")
             logger.info("Getting selected mute user -> done")
             logger.info("MUTE_WORD_MUTE -> done")
-            return Result.FAILED
+            return Result.failed
         logger.info("Getting selected mute user -> start")
 
         try:
@@ -70,7 +70,7 @@ class MuteUserMute(Base):
         finally:
             self.update_mute_user_table()
         logger.info("MUTE_USER_MUTE -> done")
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

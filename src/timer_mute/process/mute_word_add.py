@@ -21,7 +21,7 @@ class MuteWordAdd(Base):
         # ミュートワードをユーザーに問い合せる
         mute_word_str = popup_get_text("Mute word input.")
         if not mute_word_str:
-            return Result.FAILED
+            return Result.failed
 
         try:
             # デフォルトでミュートする
@@ -59,7 +59,7 @@ class MuteWordAdd(Base):
         finally:
             self.update_mute_word_table()
         logger.info("MUTE_WORD_ADD -> done")
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

@@ -91,10 +91,10 @@ class TestMuteWordAdd(unittest.TestCase):
 
         Params = namedtuple("Params", ["mute_word_str", "interval_min", "is_valid_muter", "result"])
         params_list = [
-            Params("mute_word_str", 1, True, Result.SUCCESS),
-            Params("mute_word_str", 0, True, Result.SUCCESS),
+            Params("mute_word_str", 1, True, Result.success),
+            Params("mute_word_str", 0, True, Result.success),
             Params("mute_word_str", 1, False, ValueError),
-            Params("", 1, True, Result.FAILED),
+            Params("", 1, True, Result.failed),
         ]
         for params in params_list:
             pre_run(*params[:-1])

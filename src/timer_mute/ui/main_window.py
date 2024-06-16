@@ -4,6 +4,7 @@ import logging.config
 from logging import INFO, getLogger
 from pathlib import Path
 
+import orjson
 import PySimpleGUI as sg
 
 from timer_mute.db.mute_user_db import MuteUserDB
@@ -22,7 +23,10 @@ class MainWindow:
     values: dict = {}
     mute_word_db: MuteWordDB = None
     mute_user_db: MuteUserDB = None
-    config: configparser.ConfigParser = None
+    process_dict: dict = {}
+    config: dict = {}
+
+    CONFIG_FILE_NAME = "./config/config.json"
 
     def __init__(self) -> None:
         self.mute_word_db = MuteWordDB()
@@ -41,10 +45,7 @@ class MainWindow:
         }
 
         # configファイルロード
-        CONFIG_FILE_NAME = "./config/config.ini"
-        self.config = configparser.ConfigParser()
-        if not self.config.read(CONFIG_FILE_NAME, encoding="utf8"):
-            raise IOError
+        self.config = orjson.loads(Path(self.CONFIG_FILE_NAME).read_bytes())
 
         # ウィンドウのレイアウト
         layout = self._make_layout()
@@ -58,12 +59,12 @@ class MainWindow:
         # window["-WORK_URL-"].bind("<FocusIn>", "+INPUT FOCUS+")
 
         # ロード時にセッションを取得する設定の場合、取得する
-        if self.config["on_load"].getboolean("prepare_session"):
+        if self.config["on_load"]["prepare_session"]:
             # シングルトンのため、ここでインスタンス生成しておけば以降はそのインスタンスを使い回せる
             muter = Muter(self.config)
 
         # ロード時にタイマーを復元する設定の場合は復元する
-        if self.config["on_load"].getboolean("restore_timer"):
+        if self.config["on_load"]["restore_timer"]:
             main_window_info = self._get_main_window_info()
             MuteUserRestoreTimer.set(main_window_info)
 
@@ -161,7 +162,7 @@ class MainWindow:
             [sg.Button("<- OFF <-", key="-MUTE_USER_UNMUTE-")],
         ]
 
-        screen_name = self.config["twitter"]["screen_name"]
+        screen_name = self.config["twitter_api_client"]["screen_name"]
         layout = [
             [sg.Text("TimerMute")],
             [sg.Text("操作アカウント", size=(15, 1)), sg.Input(screen_name, size=(50, 1), readonly=True)],
@@ -202,7 +203,7 @@ class MainWindow:
         window["-LIST_1-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_word_list_2]
         window["-LIST_2-"].update(values=table_data)
-        return Result.SUCCESS
+        return Result.success
 
     def _update_mute_user_table(self) -> Result:
         """mute_user テーブルを更新する"""
@@ -223,7 +224,7 @@ class MainWindow:
         window["-LIST_3-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_user_list_2]
         window["-LIST_4-"].update(values=table_data)
-        return Result.SUCCESS
+        return Result.success
 
     def _get_main_window_info(self) -> MainWindowInfo:
         main_window_info = MainWindowInfo(
@@ -268,7 +269,7 @@ class MainWindow:
 
         # ウィンドウ終了処理
         self.window.close()
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

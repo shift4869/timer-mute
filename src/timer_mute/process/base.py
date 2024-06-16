@@ -35,7 +35,7 @@ class Base(metaclass=ABCMeta):
         window["-LIST_1-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_word_list_2]
         window["-LIST_2-"].update(values=table_data)
-        return Result.SUCCESS
+        return Result.success
 
     def update_mute_user_table(self) -> Result:
         """mute_user テーブルを更新する"""
@@ -56,7 +56,7 @@ class Base(metaclass=ABCMeta):
         window["-LIST_3-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_user_list_2]
         window["-LIST_4-"].update(values=table_data)
-        return Result.SUCCESS
+        return Result.success
 
     @abstractmethod
     def run(self) -> Result:

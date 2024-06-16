@@ -59,7 +59,7 @@ class MuteWordUnmuteTimer(TimerBase):
         window["-LIST_1-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_word_list_2]
         window["-LIST_2-"].update(values=table_data)
-        return Result.SUCCESS
+        return Result.success
 
     def run(self) -> Result:
         logger.info("Timer run -> start")
@@ -80,7 +80,7 @@ class MuteWordUnmuteTimer(TimerBase):
             pass
         self.update_mute_word_table()
         logger.info("Timer run -> done")
-        return Result.SUCCESS
+        return Result.success
 
 
 class MuteUserUnmuteTimer(TimerBase):
@@ -111,7 +111,7 @@ class MuteUserUnmuteTimer(TimerBase):
         window["-LIST_3-"].update(values=table_data)
         table_data = [r.to_muted_table_list() for r in mute_user_list_2]
         window["-LIST_4-"].update(values=table_data)
-        return Result.SUCCESS
+        return Result.success
 
     def run(self) -> None:
         logger.info("Timer run -> start")
@@ -132,7 +132,7 @@ class MuteUserUnmuteTimer(TimerBase):
             pass
         self.update_mute_user_table()
         logger.info("Timer run -> done")
-        return Result.SUCCESS
+        return Result.success
 
 
 if __name__ == "__main__":

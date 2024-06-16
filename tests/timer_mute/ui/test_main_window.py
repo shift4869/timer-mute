@@ -326,7 +326,7 @@ class TestMainWindow(unittest.TestCase):
         instance.mute_word_db.select.side_effect = lambda: [r]
 
         actual = instance._update_mute_word_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.__getitem__("-LIST_1-"),
@@ -345,7 +345,7 @@ class TestMainWindow(unittest.TestCase):
         r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
         instance.mute_word_db.select.side_effect = lambda: [r]
         actual = instance._update_mute_word_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.__getitem__("-LIST_1-"),
@@ -381,7 +381,7 @@ class TestMainWindow(unittest.TestCase):
         instance.mute_user_db.select.side_effect = lambda: [r]
 
         actual = instance._update_mute_user_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.__getitem__("-LIST_3-"),
@@ -400,7 +400,7 @@ class TestMainWindow(unittest.TestCase):
         r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
         instance.mute_user_db.select.side_effect = lambda: [r]
         actual = instance._update_mute_user_table()
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
                 call.__getitem__("-LIST_3-"),
@@ -508,11 +508,11 @@ class TestMainWindow(unittest.TestCase):
 
         Params = namedtuple("Params", ["window_read", "is_valid_process_dict", "is_occur_error", "result"])
         params_list = [
-            Params([("-EXIT-", {})], True, False, Result.SUCCESS),
-            Params([("-NOT_PROCESS-", {}), ("-EXIT-", {})], True, False, Result.SUCCESS),
-            Params([("-DO_PROCESS-", {}), ("-EXIT-", {})], True, False, Result.SUCCESS),
-            Params([("-DO_PROCESS-", {}), ("-EXIT-", {})], False, False, Result.SUCCESS),
-            Params([("-DO_PROCESS-", {}), ("-EXIT-", {})], False, True, Result.SUCCESS),
+            Params([("-EXIT-", {})], True, False, Result.success),
+            Params([("-NOT_PROCESS-", {}), ("-EXIT-", {})], True, False, Result.success),
+            Params([("-DO_PROCESS-", {}), ("-EXIT-", {})], True, False, Result.success),
+            Params([("-DO_PROCESS-", {}), ("-EXIT-", {})], False, False, Result.success),
+            Params([("-DO_PROCESS-", {}), ("-EXIT-", {})], False, True, Result.success),
         ]
         for params in params_list:
             instance = MainWindow()

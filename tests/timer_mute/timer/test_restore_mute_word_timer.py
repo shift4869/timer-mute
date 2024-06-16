@@ -40,7 +40,7 @@ class TestMuteWordRestoreTimer(unittest.TestCase):
         instance = MuteWordRestoreTimer()
         main_window_info = MagicMock(spec=MainWindowInfo)
         actual = RestoreTimerBase.set(main_window_info)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
 
     def test_set(self):
         fake_now_str = "2024-01-07 12:34:56"
@@ -92,12 +92,12 @@ class TestMuteWordRestoreTimer(unittest.TestCase):
 
         Params = namedtuple("Params", ["mute_word_all", "is_valid_unmute_keyword", "is_valid_unmute", "result"])
         params_list = [
-            Params([self._get_mute_word(0)], True, True, Result.SUCCESS),
-            Params([self._get_mute_word(1)], True, True, Result.SUCCESS),
-            Params([self._get_mute_word(2)], True, True, Result.SUCCESS),
-            Params([self._get_mute_word(3)], True, True, Result.SUCCESS),
-            Params([self._get_mute_word(1)], True, False, Result.SUCCESS),
-            Params([self._get_mute_word(1)], False, True, Result.SUCCESS),
+            Params([self._get_mute_word(0)], True, True, Result.success),
+            Params([self._get_mute_word(1)], True, True, Result.success),
+            Params([self._get_mute_word(2)], True, True, Result.success),
+            Params([self._get_mute_word(3)], True, True, Result.success),
+            Params([self._get_mute_word(1)], True, False, Result.success),
+            Params([self._get_mute_word(1)], False, True, Result.success),
         ]
         for params in params_list:
             pre_run(*params[:-1])
