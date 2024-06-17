@@ -7,9 +7,5 @@
     "on_load": {
         "prepare_session": true,
         "restore_timer": true
-    },
-    "notification": {
-        "prepare_session": true,
-        "restore_timer": true
     }
 }
