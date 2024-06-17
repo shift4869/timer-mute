@@ -16,18 +16,20 @@ class TestUtil(unittest.TestCase):
 
     def test_now(self):
         self.enterContext(freezegun.freeze_time("2024-01-20 12:34:56"))
+        destination_format = "%Y-%m-%d %H:%M:%S"
         now_datetime = datetime.now()
-        expect = now_datetime.isoformat()
+        expect = now_datetime.strftime(destination_format)
         actual = now()
         self.assertEqual(expect, actual)
 
     def test_get_future_datetime(self):
         self.enterContext(freezegun.freeze_time("2024-01-20 12:34:56"))
+        destination_format = "%Y-%m-%d %H:%M:%S"
         seconds = 15
         now_datetime = datetime.now()
         delta = timedelta(seconds=seconds)
         future_datetime = now_datetime + delta
-        expect = future_datetime.isoformat()
+        expect = future_datetime.strftime(destination_format)
         actual = get_future_datetime(seconds)
         self.assertEqual(expect, actual)
 
@@ -38,7 +40,7 @@ class TestUtil(unittest.TestCase):
         seconds = -1
         delta = timedelta(seconds=seconds)
         future_datetime = now_datetime + delta
-        expect = future_datetime.isoformat()
+        expect = future_datetime.strftime(destination_format)
         actual = get_future_datetime(seconds)
         self.assertEqual(expect, actual)
 

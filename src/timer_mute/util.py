@@ -11,13 +11,14 @@ class Result(Enum):
 
 
 def now() -> str:
-    """現在時刻をisoフォーマットで返す
+    """現在時刻を所定のフォーマットで返す
 
     Returns:
-        str: isoフォーマット "%Y-%m-%dT%H:%M:%S" の現在時刻
+        str: "%Y-%m-%d %H:%M:%S" 形式の現在時刻
     """
+    destination_format = "%Y-%m-%d %H:%M:%S"
     now_datetime = datetime.now()
-    return now_datetime.isoformat()
+    return now_datetime.strftime(destination_format)
 
 
 def get_future_datetime(seconds: int) -> str:
@@ -30,12 +31,13 @@ def get_future_datetime(seconds: int) -> str:
                        負の値も受け付けるが非推奨
 
     Returns:
-        str:  isoフォーマット "%Y-%m-%dT%H:%M:%S" の時刻を表す文字列
+        str: "%Y-%m-%dT%H:%M:%S" 形式の時刻を表す文字列
     """
+    destination_format = "%Y-%m-%d %H:%M:%S"
     now_datetime = datetime.now()
     delta = timedelta(seconds=seconds)
     future_datetime = now_datetime + delta
-    return future_datetime.isoformat()
+    return future_datetime.strftime(destination_format)
 
 
 def popup_get_text(

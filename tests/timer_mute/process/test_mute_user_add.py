@@ -14,7 +14,7 @@ from timer_mute.util import Result, get_future_datetime
 
 class TestMuteUserAdd(unittest.TestCase):
     def test_run(self):
-        fake_now_str = "2024-01-06T12:34:56"
+        fake_now_str = "2024-01-06 12:34:56"
         self.enterContext(freezegun.freeze_time(fake_now_str))
         self.enterContext(patch("timer_mute.process.mute_user_add.print"))
         self.enterContext(patch("timer_mute.process.mute_user_add.logger.info"))
