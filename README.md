@@ -53,5 +53,5 @@
 
 
 ## License/Author
-- GNU Lesser
+- GNU Lesser General Public License v3.0（PySimpleGUIを使用している）  
 - Copyright (c) 2022 - 2024 [shift](https://twitter.com/_shift4869)
