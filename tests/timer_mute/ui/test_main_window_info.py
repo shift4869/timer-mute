@@ -17,7 +17,7 @@ class TestMainWindowInfo(unittest.TestCase):
         values = MagicMock(spec=dict)
         mute_word_db = MagicMock(spec=MuteWordDB)
         mute_user_db = MagicMock(spec=MuteUserDB)
-        config = MagicMock(spec=configparser.ConfigParser)
+        config = MagicMock(spec=dict)
 
         instance = MainWindowInfo(window, values, mute_word_db, mute_user_db, config)
         self.assertEqual(window, instance.window)

@@ -11,33 +11,31 @@ class Result(Enum):
 
 
 def now() -> str:
-    """現在時刻を所定のフォーマットで返す
+    """現在時刻をisoフォーマットで返す
 
     Returns:
-        str: destination_format = "%Y-%m-%d %H:%M:%S" 形式の現在時刻
+        str: isoフォーマット "%Y-%m-%dT%H:%M:%S" の現在時刻
     """
-    destination_format = "%Y-%m-%d %H:%M:%S"
     now_datetime = datetime.now()
-    return now_datetime.strftime(destination_format)
+    return now_datetime.isoformat()
 
 
 def get_future_datetime(seconds: int) -> str:
     """未来日時刻を所定のフォーマットで返す
 
-    現在時刻から seconds [sec]経過した後の時刻を返す
+    現在時刻から seconds[sec] 経過した後の時刻を返す
 
     Args:
         seconds (int): 未来日を指定する秒[sec]
                        負の値も受け付けるが非推奨
 
     Returns:
-        str: "%Y-%m-%d %H:%M:%S" 形式の時刻を表す文字列
+        str:  isoフォーマット "%Y-%m-%dT%H:%M:%S" の時刻を表す文字列
     """
-    destination_format = "%Y-%m-%d %H:%M:%S"
     now_datetime = datetime.now()
     delta = timedelta(seconds=seconds)
     future_datetime = now_datetime + delta
-    return future_datetime.strftime(destination_format)
+    return future_datetime.isoformat()
 
 
 def popup_get_text(
@@ -171,10 +169,10 @@ def popup_get_interval(
     if button != "Submit":
         return None
 
-    interval_minutes = -1
+    interval_minutes = None
     if values.get("-R6-", "") != "" and values.get("-R7-", "") in combo_list:
-        interval_str = values.get("-R6-", "")
-        unit = values.get("-R7-", "")
+        interval_str: str = values.get("-R6-", "")
+        unit: str = values.get("-R7-", "")
         if not (interval_str and unit):
             return None
         if not re.search(r"^[0-9]*$", interval_str):
@@ -193,8 +191,6 @@ def popup_get_interval(
                 interval_minutes = interval_num * 60 * 24 * 31  # min
             case "years later":
                 interval_minutes = interval_num * 60 * 24 * 31 * 12  # min
-            case _:
-                return None
         return interval_minutes
 
     if values.get("-R0-", False):
@@ -208,11 +204,10 @@ def popup_get_interval(
         values.get("-R5-", False),
     ]
     radio_button_value = [1, 2, 6, 12, 24]
-    if any(radio_button_select_list):
-        for i, v in enumerate(radio_button_select_list):
-            if v:
-                interval_minutes = radio_button_value[i] * 60  # min
-                return interval_minutes
+    for i, v in enumerate(radio_button_select_list):
+        if v:
+            interval_minutes = radio_button_value[i] * 60  # min
+            return interval_minutes
     return None
 
 

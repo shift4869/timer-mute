@@ -1,7 +1,5 @@
-import configparser
 import sys
 import unittest
-from pathlib import Path
 
 from mock import MagicMock, call, patch
 
@@ -18,7 +16,7 @@ class TestMuter(unittest.TestCase):
                 "target_id": 11111,
             }
         }
-        r = MagicMock(spec=configparser.ConfigParser)
+        r = MagicMock(spec=dict)
         r.__getitem__.side_effect = lambda key: config_dict[key]
         return r
 
@@ -33,17 +31,13 @@ class TestMuter(unittest.TestCase):
         self._reset_muter()
 
         instance = Muter(mock_config)
-        self.assertEqual("ct0", instance.ct0)
-        self.assertEqual("auth_token", instance.auth_token)
-        self.assertEqual("target_screen_name", instance.target_screen_name)
-        self.assertEqual(11111, instance.target_id)
         mock_account.assert_called_once_with(cookies={"ct0": "ct0", "auth_token": "auth_token"}, pbar=False)
 
         mock_account.reset_mock()
         instance = Muter(mock_config)
         mock_account.assert_not_called()
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             instance = Muter("invalid")
 
     def test_get_mute_keyword_list(self):

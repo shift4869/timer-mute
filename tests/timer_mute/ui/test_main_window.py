@@ -13,10 +13,33 @@ from timer_mute.util import Result
 
 
 class TestMainWindow(unittest.TestCase):
+    def _get_instance(self) -> MainWindow:
+        mock_mute_word_db = self.enterContext(patch("timer_mute.ui.main_window.MuteWordDB"))
+        mock_mute_user_db = self.enterContext(patch("timer_mute.ui.main_window.MuteUserDB"))
+        mock_config_file_name = self.enterContext(
+            patch.object(MainWindow, "CONFIG_FILE_NAME", "./config/config_example.json")
+        )
+        mock_layout = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._make_layout"))
+        mock_window = self.enterContext(patch("timer_mute.ui.main_window.sg.Window"))
+        mock_main_window_info = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._get_main_window_info"))
+        mock_muter = self.enterContext(patch("timer_mute.ui.main_window.Muter"))
+        mock_restore_timer = self.enterContext(patch("timer_mute.ui.main_window.MuteUserRestoreTimer"))
+        mock_update_mute_word_table = self.enterContext(
+            patch("timer_mute.ui.main_window.MainWindow._update_mute_word_table")
+        )
+        mock_update_mute_user_table = self.enterContext(
+            patch("timer_mute.ui.main_window.MainWindow._update_mute_user_table")
+        )
+        instance = MainWindow()
+        return instance
+
     def test_init(self):
         mock_mute_word_db = self.enterContext(patch("timer_mute.ui.main_window.MuteWordDB"))
         mock_mute_user_db = self.enterContext(patch("timer_mute.ui.main_window.MuteUserDB"))
-        mock_config = self.enterContext(patch("timer_mute.ui.main_window.configparser.ConfigParser"))
+        mock_config = self.enterContext(patch("timer_mute.ui.main_window.orjson.loads"))
+        mock_config_file_name = self.enterContext(
+            patch.object(MainWindow, "CONFIG_FILE_NAME", "./config/config_example.json")
+        )
         mock_layout = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._make_layout"))
         mock_window = self.enterContext(patch("timer_mute.ui.main_window.sg.Window"))
         mock_main_window_info = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._get_main_window_info"))
@@ -31,23 +54,27 @@ class TestMainWindow(unittest.TestCase):
 
         ICON_PATH = "./image/icon.png"
         icon_binary = Path(ICON_PATH).read_bytes()
+        read_bytes = Path(MainWindow.CONFIG_FILE_NAME).read_bytes()
 
-        def pre_run(is_valid_config, prepare_session, restore_timer):
+        Params = namedtuple(
+            "Params",
+            ["is_valid_config", "prepare_session", "restore_timer", "result"],
+        )
+
+        def pre_run(params: Params) -> None:
             mock_mute_word_db.reset_mock()
             mock_mute_user_db.reset_mock()
             mock_config.reset_mock()
-            if not is_valid_config:
-                mock_config.return_value.read.side_effect = lambda filenames, encoding: False
+            if not params.is_valid_config:
+                mock_config.side_effect = IOError
             else:
                 on_load_dict = {
-                    "prepare_session": prepare_session,
-                    "restore_timer": restore_timer,
+                    "on_load": {
+                        "prepare_session": params.prepare_session,
+                        "restore_timer": params.restore_timer,
+                    }
                 }
-
-                def f(key):
-                    return on_load_dict[key]
-
-                mock_config.return_value.__getitem__.return_value.getboolean.side_effect = f
+                mock_config.side_effect = lambda obj: on_load_dict
             mock_layout.reset_mock()
             mock_window.reset_mock()
             mock_main_window_info.reset_mock()
@@ -56,17 +83,11 @@ class TestMainWindow(unittest.TestCase):
             mock_update_mute_word_table.reset_mock()
             mock_update_mute_user_table.reset_mock()
 
-        def post_run(is_valid_config, prepare_session, restore_timer, instance):
+        def post_run(params: Params, instance: MainWindow) -> None:
             mock_mute_word_db.assert_called_once_with()
             mock_mute_user_db.assert_called_once_with()
-            if not is_valid_config:
-                self.assertEqual(
-                    [
-                        call(),
-                        call().read("./config/config.ini", encoding="utf8"),
-                    ],
-                    mock_config.mock_calls,
-                )
+            mock_config.assert_called_once_with(read_bytes)
+            if not params.is_valid_config:
                 mock_layout.assert_not_called()
                 mock_window.assert_not_called()
                 mock_main_window_info.assert_not_called()
@@ -76,27 +97,21 @@ class TestMainWindow(unittest.TestCase):
                 mock_update_mute_user_table.assert_not_called()
                 return
 
-            self.assertEqual(
-                [
-                    call(),
-                    call().read("./config/config.ini", encoding="utf8"),
-                    call().read().__bool__(),
-                    call().__getitem__("on_load"),
-                    call().__getitem__().getboolean("prepare_session"),
-                    call().__getitem__("on_load"),
-                    call().__getitem__().getboolean("restore_timer"),
-                ],
-                mock_config.mock_calls,
-            )
             mock_layout.assert_called_once_with()
             mock_window.assert_called_once_with(
                 "TimerMute", mock_layout.return_value, icon=icon_binary, size=(1220, 900), finalize=True
             )
-            if prepare_session:
-                mock_muter.assert_called_once_with(mock_config.return_value)
+            on_load_dict = {
+                "on_load": {
+                    "prepare_session": params.prepare_session,
+                    "restore_timer": params.restore_timer,
+                }
+            }
+            if params.prepare_session:
+                mock_muter.assert_called_once_with(on_load_dict)
             else:
                 mock_muter.assert_not_called()
-            if restore_timer:
+            if params.restore_timer:
                 mock_main_window_info.assert_called_once_with()
                 mock_restore_timer.set.assert_called_once_with(mock_main_window_info.return_value)
             else:
@@ -122,11 +137,8 @@ class TestMainWindow(unittest.TestCase):
                 },
                 instance.process_dict,
             )
+            self.assertEqual(on_load_dict, instance.config)
 
-        Params = namedtuple(
-            "Params",
-            ["is_valid_config", "prepare_session", "restore_timer", "result"],
-        )
         params_list = [
             Params(True, True, True, None),
             Params(True, True, False, None),
@@ -135,33 +147,21 @@ class TestMainWindow(unittest.TestCase):
         ]
         for params in params_list:
             expect = params[-1]
-            pre_run(*params[:-1])
-            actual = None
+            pre_run(params)
+            instance = None
             if expect is not None:
                 with self.assertRaises(expect):
-                    actual = MainWindow()
+                    instance = MainWindow()
             else:
-                actual = MainWindow()
-            post_run(*params[:-1], actual)
+                instance = MainWindow()
+            post_run(params, instance)
 
     def test_make_layout(self):
-        mock_mute_word_db = self.enterContext(patch("timer_mute.ui.main_window.MuteWordDB"))
-        mock_mute_user_db = self.enterContext(patch("timer_mute.ui.main_window.MuteUserDB"))
-        mock_config = self.enterContext(patch("timer_mute.ui.main_window.configparser.ConfigParser"))
-        mock_window = self.enterContext(patch("timer_mute.ui.main_window.sg.Window"))
-        mock_main_window_info = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._get_main_window_info"))
-        mock_muter = self.enterContext(patch("timer_mute.ui.main_window.Muter"))
-        mock_restore_timer = self.enterContext(patch("timer_mute.ui.main_window.MuteUserRestoreTimer"))
-        mock_update_mute_word_table = self.enterContext(
-            patch("timer_mute.ui.main_window.MainWindow._update_mute_word_table")
-        )
-        mock_update_mute_user_table = self.enterContext(
-            patch("timer_mute.ui.main_window.MainWindow._update_mute_user_table")
-        )
-        instance = MainWindow()
+        origin = MainWindow._make_layout
+        instance = self._get_instance()
 
-        actual = instance._make_layout()
-        screen_name = instance.config["twitter"]["screen_name"]
+        actual = origin(instance)
+        screen_name = instance.config["twitter_api_client"]["screen_name"]
 
         def expect_layout():
             table_cols_name = ["No.", "     ミュートワード     ", "     更新日時     ", "     作成日時     "]
@@ -303,21 +303,9 @@ class TestMainWindow(unittest.TestCase):
         check_layout(expect, actual)
 
     def test_update_mute_word_table(self):
-        mock_mute_word_db = self.enterContext(patch("timer_mute.ui.main_window.MuteWordDB"))
-        mock_mute_user_db = self.enterContext(patch("timer_mute.ui.main_window.MuteUserDB"))
-        mock_config = self.enterContext(patch("timer_mute.ui.main_window.configparser.ConfigParser"))
-        mock_layout = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._make_layout"))
-        mock_window = self.enterContext(patch("timer_mute.ui.main_window.sg.Window"))
-        mock_main_window_info = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._get_main_window_info"))
-        mock_muter = self.enterContext(patch("timer_mute.ui.main_window.Muter"))
-        mock_restore_timer = self.enterContext(patch("timer_mute.ui.main_window.MuteUserRestoreTimer"))
-        mock_update_mute_user_table = self.enterContext(
-            patch("timer_mute.ui.main_window.MainWindow._update_mute_user_table")
-        )
+        origin = MainWindow._update_mute_word_table
+        instance = self._get_instance()
 
-        instance = MainWindow()
-        instance.window = mock_window
-        instance.mute_word_db = mock_mute_word_db
         instance.window.reset_mock()
         instance.mute_word_db.reset_mock()
         r = MagicMock()
@@ -325,7 +313,7 @@ class TestMainWindow(unittest.TestCase):
         r.to_muted_table_list = lambda: "to_muted_table_list()"
         instance.mute_word_db.select.side_effect = lambda: [r]
 
-        actual = instance._update_mute_word_table()
+        actual = origin(instance)
         self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
@@ -344,7 +332,7 @@ class TestMainWindow(unittest.TestCase):
         r.status = "unmuted"
         r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
         instance.mute_word_db.select.side_effect = lambda: [r]
-        actual = instance._update_mute_word_table()
+        actual = origin(instance)
         self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
@@ -358,21 +346,9 @@ class TestMainWindow(unittest.TestCase):
         instance.mute_word_db.select.assert_called_once_with()
 
     def test_update_mute_user_table(self):
-        mock_mute_word_db = self.enterContext(patch("timer_mute.ui.main_window.MuteWordDB"))
-        mock_mute_user_db = self.enterContext(patch("timer_mute.ui.main_window.MuteUserDB"))
-        mock_config = self.enterContext(patch("timer_mute.ui.main_window.configparser.ConfigParser"))
-        mock_layout = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._make_layout"))
-        mock_window = self.enterContext(patch("timer_mute.ui.main_window.sg.Window"))
-        mock_main_window_info = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._get_main_window_info"))
-        mock_muter = self.enterContext(patch("timer_mute.ui.main_window.Muter"))
-        mock_restore_timer = self.enterContext(patch("timer_mute.ui.main_window.MuteUserRestoreTimer"))
-        mock_update_mute_word_table = self.enterContext(
-            patch("timer_mute.ui.main_window.MainWindow._update_mute_word_table")
-        )
+        origin = MainWindow._update_mute_user_table
+        instance = self._get_instance()
 
-        instance = MainWindow()
-        instance.window = mock_window
-        instance.mute_user_db = mock_mute_user_db
         instance.window.reset_mock()
         instance.mute_user_db.reset_mock()
         r = MagicMock()
@@ -380,7 +356,7 @@ class TestMainWindow(unittest.TestCase):
         r.to_muted_table_list = lambda: "to_muted_table_list()"
         instance.mute_user_db.select.side_effect = lambda: [r]
 
-        actual = instance._update_mute_user_table()
+        actual = origin(instance)
         self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
@@ -399,7 +375,7 @@ class TestMainWindow(unittest.TestCase):
         r.status = "unmuted"
         r.to_unmuted_table_list = lambda: "to_unmuted_table_list()"
         instance.mute_user_db.select.side_effect = lambda: [r]
-        actual = instance._update_mute_user_table()
+        actual = origin(instance)
         self.assertEqual(Result.success, actual)
         self.assertEqual(
             [
@@ -413,100 +389,74 @@ class TestMainWindow(unittest.TestCase):
         instance.mute_user_db.select.assert_called_once_with()
 
     def test_get_main_window_info(self):
-        mock_mute_word_db = self.enterContext(patch("timer_mute.ui.main_window.MuteWordDB"))
-        mock_mute_user_db = self.enterContext(patch("timer_mute.ui.main_window.MuteUserDB"))
-        mock_config = self.enterContext(patch("timer_mute.ui.main_window.configparser.ConfigParser"))
-        mock_layout = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._make_layout"))
-        mock_window = self.enterContext(patch("timer_mute.ui.main_window.sg.Window"))
-        mock_muter = self.enterContext(patch("timer_mute.ui.main_window.Muter"))
-        mock_restore_timer = self.enterContext(patch("timer_mute.ui.main_window.MuteUserRestoreTimer"))
-        mock_update_mute_word_table = self.enterContext(
-            patch("timer_mute.ui.main_window.MainWindow._update_mute_word_table")
-        )
-        mock_update_mute_user_table = self.enterContext(
-            patch("timer_mute.ui.main_window.MainWindow._update_mute_user_table")
-        )
-        mock_mute_word_db = self.enterContext(patch("timer_mute.ui.main_window.MainWindowInfo"))
-        instance = MainWindow()
-        actual = instance._get_main_window_info()
-        mock_mute_word_db.assert_called_with(
+        mock_main_window_info = self.enterContext(patch("timer_mute.ui.main_window.MainWindowInfo"))
+        origin = MainWindow._get_main_window_info
+        instance = self._get_instance()
+        actual = origin(instance)
+        mock_main_window_info.assert_called_with(
             instance.window,
             instance.values,
             instance.mute_word_db,
             instance.mute_user_db,
             instance.config,
         )
+        self.assertEqual(mock_main_window_info.return_value, actual)
 
     def test_run(self):
-        mock_mute_word_db = self.enterContext(patch("timer_mute.ui.main_window.MuteWordDB"))
-        mock_mute_user_db = self.enterContext(patch("timer_mute.ui.main_window.MuteUserDB"))
-        mock_config = self.enterContext(patch("timer_mute.ui.main_window.configparser.ConfigParser"))
-        mock_layout = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._make_layout"))
-        mock_sg_window = self.enterContext(patch("timer_mute.ui.main_window.sg.Window"))
-        mock_main_window_info = self.enterContext(patch("timer_mute.ui.main_window.MainWindow._get_main_window_info"))
-        mock_muter = self.enterContext(patch("timer_mute.ui.main_window.Muter"))
-        mock_restore_timer = self.enterContext(patch("timer_mute.ui.main_window.MuteUserRestoreTimer"))
-        mock_update_mute_word_table = self.enterContext(
-            patch("timer_mute.ui.main_window.MainWindow._update_mute_word_table")
-        )
-        mock_update_mute_user_table = self.enterContext(
-            patch("timer_mute.ui.main_window.MainWindow._update_mute_user_table")
-        )
         mock_logging = self.enterContext(patch("timer_mute.ui.main_window.logging.config.fileConfig"))
         mock_getLogger = self.enterContext(patch("timer_mute.ui.main_window.getLogger"))
         mock_print = self.enterContext(patch("timer_mute.ui.main_window.print"))
-        mock_window = MagicMock()
         mock_process_dict = MagicMock()
         mock_process_base = MagicMock()
 
-        def pre_run(instance, window_read, is_valid_process_dict, is_occur_error):
-            mock_window.reset_mock()
-            mock_window.read.side_effect = window_read
-            instance.window = mock_window
+        Params = namedtuple("Params", ["window_read", "is_valid_process_dict", "is_occur_error", "result"])
+
+        def pre_run(params: Params, instance: MainWindow) -> None:
+            instance.window.reset_mock()
+            instance.window.read.side_effect = params.window_read
 
             mock_process_dict.reset_mock()
             mock_process_base.reset_mock()
-            if is_valid_process_dict:
+            if params.is_valid_process_dict:
                 mock_process_dict.get.side_effect = lambda key: {"-DO_PROCESS-": mock_process_base}.get(key)
             else:
-                if is_occur_error:
+                if params.is_occur_error:
                     mock_process_dict.get.side_effect = lambda key: {"-DO_PROCESS-": "invalid_process"}.get(key)
                 else:
                     mock_process_base.side_effect = lambda info: None
                     mock_process_dict.get.side_effect = lambda key: {"-DO_PROCESS-": mock_process_base}.get(key)
             instance.process_dict = mock_process_dict
 
-            mock_main_window_info.reset_mock()
+            instance._get_main_window_info.reset_mock()
 
-        def post_run(window_read, is_valid_process_dict, is_occur_error):
-            expect_window_call = [call.read() for _ in range(len(window_read))]
+        def post_run(params: Params, instance: MainWindow) -> None:
+            expect_window_call = [call.read() for _ in range(len(params.window_read))]
             expect_window_call.append(call.close())
-            self.assertEqual(expect_window_call, mock_window.mock_calls)
+            self.assertEqual(expect_window_call, instance.window.mock_calls)
 
-            is_do_process = any([event == "-DO_PROCESS-" for event, _ in window_read])
+            is_do_process = any([event == "-DO_PROCESS-" for event, _ in params.window_read])
             if not is_do_process:
                 mock_process_dict.assert_not_called()
                 mock_process_base.assert_not_called()
-                mock_main_window_info.assert_not_called()
+                instance._get_main_window_info.assert_not_called()
                 return
 
             self.assertEqual([call.get("-DO_PROCESS-"), call.get("-DO_PROCESS-")], mock_process_dict.mock_calls)
-            if is_valid_process_dict:
+            if params.is_valid_process_dict:
                 self.assertEqual(
-                    [call.__bool__(), call(mock_main_window_info.return_value), call().run()],
+                    [call.__bool__(), call(instance._get_main_window_info.return_value), call().run()],
                     mock_process_base.mock_calls,
                 )
             else:
-                if is_occur_error:
+                if params.is_occur_error:
                     mock_process_base.assert_not_called()
                 else:
                     self.assertEqual(
-                        [call.__bool__(), call(mock_main_window_info.return_value)],
+                        [call.__bool__(), call(instance._get_main_window_info.return_value)],
                         mock_process_base.mock_calls,
                     )
-            self.assertEqual([call()], mock_main_window_info.mock_calls)
+            self.assertEqual([call()], instance._get_main_window_info.mock_calls)
 
-        Params = namedtuple("Params", ["window_read", "is_valid_process_dict", "is_occur_error", "result"])
         params_list = [
             Params([("-EXIT-", {})], True, False, Result.success),
             Params([("-NOT_PROCESS-", {}), ("-EXIT-", {})], True, False, Result.success),
@@ -515,12 +465,12 @@ class TestMainWindow(unittest.TestCase):
             Params([("-DO_PROCESS-", {}), ("-EXIT-", {})], False, True, Result.success),
         ]
         for params in params_list:
-            instance = MainWindow()
-            pre_run(instance, *params[:-1])
+            instance = self._get_instance()
+            pre_run(params, instance)
             actual = instance.run()
             expect = params[-1]
             self.assertEqual(expect, actual)
-            post_run(*params[:-1])
+            post_run(params, instance)
 
 
 if __name__ == "__main__":

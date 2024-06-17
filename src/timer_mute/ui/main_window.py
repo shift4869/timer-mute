@@ -1,4 +1,3 @@
-import configparser
 import logging
 import logging.config
 from logging import INFO, getLogger
