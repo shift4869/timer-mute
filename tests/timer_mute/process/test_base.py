@@ -1,5 +1,6 @@
 import sys
 import unittest
+from collections import namedtuple
 
 import PySimpleGUI as sg
 from mock import MagicMock, call
@@ -26,6 +27,24 @@ class TestBase(unittest.TestCase):
         self.assertEqual(main_window_info, instance.main_window_info)
         with self.assertRaises(ValueError):
             instance = ConcreteBase("invalid_arg")
+
+    def test_sanitize(self):
+        main_window_info = MagicMock(spec=MainWindowInfo)
+        instance = ConcreteBase(main_window_info)
+
+        Params = namedtuple("Params", ["input", "expect"])
+        params_list: list[Params] = [
+            Params("mute_word_str", "mute_word_str"),
+            Params(" include_whitespace_str", "include_whitespace_str"),
+            Params("include_whitespace_str ", "include_whitespace_str"),
+            Params("　include_whitespace_str　", "include_whitespace_str"),
+            Params("", ""),
+        ]
+        for params in params_list:
+            self.assertEqual(params.expect, instance.sanitize(params.input))
+
+        with self.assertRaises(ValueError):
+            instance.sanitize(-1)
 
     def test_update_mute_word_table(self):
         main_window_info = MagicMock(spec=MainWindowInfo)

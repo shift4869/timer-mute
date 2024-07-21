@@ -20,6 +20,7 @@ class MuteUserAdd(Base):
         logger.info("MUTE_USER_ADD -> start")
         # ミュートユーザーをユーザーに問い合せる
         mute_user_str = popup_get_text("mute user input.")
+        mute_user_str = self.sanitize(mute_user_str)
         if not mute_user_str:
             return Result.failed
 

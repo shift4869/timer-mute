@@ -16,6 +16,22 @@ class Base(metaclass=ABCMeta):
             raise ValueError("main_window_info must be MainWindowInfo.")
         self.main_window_info = main_window_info
 
+    def sanitize(self, input_string: str) -> str:
+        """最低限のサニタイズを行う
+
+        Args:
+            input_string (str): サニタイズ前の文字列
+
+        Returns:
+            str: サニタイズ後の文字列
+        """
+        if not isinstance(input_string, str):
+            raise ValueError("input_string must be str.")
+
+        # 両側の空白の削除
+        result: str = input_string.strip(" \t\n\r\u3000")
+        return result
+
     def update_mute_word_table(self) -> Result:
         """mute_word テーブルを更新する"""
         window: sg.Window = self.main_window_info.window

@@ -20,6 +20,7 @@ class MuteWordAdd(Base):
         logger.info("MUTE_WORD_ADD -> start")
         # ミュートワードをユーザーに問い合せる
         mute_word_str = popup_get_text("Mute word input.")
+        mute_word_str = self.sanitize(mute_word_str)
         if not mute_word_str:
             return Result.failed
 
