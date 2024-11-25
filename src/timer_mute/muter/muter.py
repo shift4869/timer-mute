@@ -1,12 +1,20 @@
 import pprint
+import re
 from logging import INFO, getLogger
 from pathlib import Path
 from time import sleep
+from typing import cast
 
-from httpx import Response
+import httpx
 import orjson
+from bs4 import BeautifulSoup
+from httpx import Response
+from requests.cookies import RequestsCookieJar
+# from requests_html import HTMLSession
 from twitter.account import Account
 from twitter.util import get_headers
+
+from timer_mute.muter.session import CookieSessionUserHandler
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -35,6 +43,110 @@ class Muter:
         path = "mutes/keywords/list.json"
         params = {}
         headers = get_headers(self.account.session)
+
+        # access_token_secret から Cookie を取得
+        cookies_dict: dict[str, str] = self.account.session.cookies
+
+        # RequestCookieJar オブジェクトに変換
+        cookies = RequestsCookieJar()
+        for key, value in cookies_dict.items():
+            cookies.set(key, value)
+
+        # 読み込んだ RequestCookieJar オブジェクトを CookieSessionUserHandler に渡す
+        # Cookie を指定する際はコンストラクタ内部で API リクエストは行われないため、ログイン時のように await する必要性はない
+        self.cookie_session_user_handler = CookieSessionUserHandler(cookies=cookies)
+        self.graphql_headers_dict = (
+            self.cookie_session_user_handler.get_graphql_api_headers()
+        )  # GraphQL API 用ヘッダー
+        self.html_headers_dict = self.cookie_session_user_handler.get_html_headers()  # HTML 用ヘッダー
+        self.js_headers_dict = self.cookie_session_user_handler.get_js_headers(
+            cross_origin=True
+        )  # JavaScript 用ヘッダー
+
+        cookies_dict = self.cookie_session_user_handler.get_cookies_as_dict()
+        cookies = httpx.Cookies()
+        for name, value in cookies_dict.items():
+            # ドメインを ".x.com" 、パスを "/" に設定しておくことが重要 (でないと Cookie 更新時にちゃんと上書きできない)
+            # ただし "lang" キーだけは ".x.com" でなく "x.com" にする必要がある
+            if name == "lang":
+                cookies.set(name, value, domain="x.com", path="/")
+            else:
+                cookies.set(name, value, domain=".x.com", path="/")
+
+        # httpx の非同期 HTTP クライアントのインスタンスを作成
+        # 可能な限り Chrome からのリクエストに偽装するため、app.constants.HTTPX_CLIENT は使わずに独自のインスタンスを作成する
+        self.httpx_client = httpx.Client(
+            # Cookie を設定
+            # Cookie はこの HTTP クライアントで行う全リクエストで共有されてほしいので、ここで設定している
+            # 一方リクエストヘッダーはリクエスト先のリソース種類によって異なるためここでは設定せず、リクエスト毎に個別に設定する
+            # (HTTP クライアントレベルで設定されたヘッダーは上書きや削除が難しそうなため)
+            cookies=cookies,
+            # リダイレクトを追跡する
+            follow_redirects=True,
+            # 可能な限り Chrome からのリクエストに偽装するため、HTTP/1.1 ではなく明示的に HTTP/2 で接続する
+            http2=True,
+        )
+
+        # Twitter Web App (SPA) の HTML を取得
+        # HTML リクエスト用のヘッダーに差し替えるのが重要
+        twitter_web_app_html = self.httpx_client.get("https://x.com/home", headers=self.html_headers_dict)
+        if twitter_web_app_html.status_code != 200:
+            logging.error(
+                f"[TwitterGraphQLAPI] Failed to fetch Twitter Web App HTML: {twitter_web_app_html.status_code}"
+            )
+            return ValueError(
+                f"Challenge 情報の取得に失敗しました。Twitter Web App の HTML を取得できませんでした。(HTTP Error {twitter_web_app_html.status_code})",
+            )
+        twitter_web_app_html_text = twitter_web_app_html.text
+
+        # BeautifulSoup を使って HTML をパース
+        soup = BeautifulSoup(twitter_web_app_html_text, "html.parser")
+
+        # HTML の meta タグに含まれる検証コードを取得
+        meta_tag = soup.select_one('meta[name="twitter-site-verification"]')
+        if meta_tag is None:
+            logging.error(f"[TwitterGraphQLAPI] Failed to fetch verification code from Twitter Web App HTML")
+            return ValueError(
+                "Challenge 情報の取得に失敗しました。Twitter Web App の HTML から検証コードを取得できませんでした。",
+            )
+        verification_code = cast(str, meta_tag["content"])
+
+        # HTML からチャレンジコードを取得
+        challenge_code_match = re.search(r'"ondemand.s":"(\w+)"', twitter_web_app_html_text)
+        if not challenge_code_match:
+            logging.error(f"[TwitterGraphQLAPI] Failed to fetch challenge code from Twitter Web App HTML")
+            return ValueError(
+                "Challenge 情報の取得に失敗しました。Twitter Web App の HTML からチャレンジコードを取得できませんでした。",
+            )
+        challenge_code = challenge_code_match.group(1)
+
+        # HTML からアニメーション SVG の outerHTML を取得
+        challenge_animation_svg_codes = [str(svg) for svg in soup.select('svg[id^="loading-x"]')]
+
+        # Challenge 情報を取得
+        # JavaScript リクエスト用のヘッダーに差し替えるのが重要
+        challenge_js_code_response = self.httpx_client.get(
+            url=f"https://abs.twimg.com/responsive-web/client-web/ondemand.s.{challenge_code}a.js",
+            headers=self.js_headers_dict,
+        )
+        if challenge_js_code_response.status_code != 200:
+            logging.error(f"[TwitterGraphQLAPI] Failed to fetch challenge code from Twitter Web App HTML")
+            return ValueError(
+                f"Challenge 情報の取得に失敗しました。Twitter Web App のチャレンジコードからチャレンジコードを取得できませんでした。"
+                f"(HTTP Error {challenge_js_code_response.status_code})"
+            )
+        challenge_js_code = challenge_js_code_response.text
+        challenge_result = (
+            verification_code,
+            challenge_js_code,
+            challenge_animation_svg_codes,
+        )
+
+        # solver_session = HTMLSession()
+
+        headers["x-client-transaction-id"] = (
+            "Cm9LTrTawONc60rPTfWVy/0ONFi9Y1VkW16PdOXH/s4BC+td+UXoEjFyNGLpCCTuQ5RS/giOVaMoWVfFOJ8PiK+YGVcbCQ"
+        )
         r: Response = self.account.session.get(f"{self.account.v1_api}/{path}", headers=headers, params=params)
         result: dict = r.json()
         logger.info("Getting mute word list all -> done")

@@ -6,19 +6,22 @@ authors = [
     { name = "shift" }
 ]
 dependencies = [
+    "beautifulsoup4>=4.12.3",
     "coverage>=7.5.3",
     "freezegun>=1.5.1",
     "isort>=5.13.2",
     "mock>=5.1.0",
-    "orjson>=3.10.5",
     "pycodestyle>=2.11.1",
     "pysimplegui==4.60.5",
     "ruff>=0.4.8",
     "sqlalchemy>=2.0.30",
     "twitter-api-client>=0.10.22",
+    "orjson==3.9.8",
+    "requests>=2.32.3",
+    "httpx[http2]>=0.27.2",
 ]
 readme = "README.md"
-requires-python = ">= 3.12"
+requires-python = ">= 3.11"
 
 [build-system]
 requires = ["hatchling"]
