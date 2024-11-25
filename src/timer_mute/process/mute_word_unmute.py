@@ -34,15 +34,15 @@ class MuteWordUnmute(Base):
         try:
             # Muter インスタンスを作成し、選択ワードのミュートを解除する
             logger.info("Unmute by unmute_keyword -> start")
-            config = self.main_window_info.config
-            muter = Muter(config)
+            # config = self.main_window_info.config
+            # muter = Muter(config)
             for mute_word in mute_word_list:
                 # 選択ワードのミュートを解除
                 mute_word_str = mute_word[1]
                 logger.info(f"Target keyword is '{mute_word_str}'.")
-                r_dict = muter.unmute_keyword(mute_word_str)
-                print(r_dict)
-                logger.info(f"'{mute_word_str}' is unmuted.")
+                # r_dict = muter.unmute_keyword(mute_word_str)
+                # print(r_dict)
+                # logger.info(f"'{mute_word_str}' is unmuted.")
 
                 # DB修正
                 logger.info("DB update -> start")

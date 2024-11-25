@@ -26,29 +26,29 @@ class MuteWordAdd(Base):
 
         try:
             # デフォルトでミュートする
-            logger.info("Mute by mute_keyword -> start")
-            logger.info(f"Target keyword is '{mute_word_str}'.")
-            config = self.main_window_info.config
-            muter = Muter(config)
-            r_dict = muter.mute_keyword(mute_word_str)
-            print(r_dict)
-            logger.info(f"'{mute_word_str}' is muted.")
-            logger.info("Mute by mute_keyword -> done")
+            # logger.info("Mute by mute_keyword -> start")
+            # logger.info(f"Target keyword is '{mute_word_str}'.")
+            # config = self.main_window_info.config
+            # muter = Muter(config)
+            # r_dict = muter.mute_keyword(mute_word_str)
+            # print(r_dict)
+            # logger.info(f"'{mute_word_str}' is muted.")
+            # logger.info("Mute by mute_keyword -> done")
 
             # 解除タイマー
             # interval をユーザーに問い合せる
             interval_min = popup_get_interval()  # min
             unmuted_at = get_future_datetime(interval_min * 60) if interval_min else ""
-            if interval_min:
-                logger.info("Unmute timer set -> start")
-                # 解除タイマーセット
-                # interval = 10  # DEBUG
-                interval = interval_min * 60  # sec
-                timer = MuteWordUnmuteTimer(self.main_window_info, muter, interval, mute_word_str)
-                timer.start()
+            # if interval_min:
+            #     logger.info("Unmute timer set -> start")
+            #     # 解除タイマーセット
+            #     # interval = 10  # DEBUG
+            #     interval = interval_min * 60  # sec
+            #     timer = MuteWordUnmuteTimer(self.main_window_info, muter, interval, mute_word_str)
+            #     timer.start()
 
-                logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_word_str}'.")
-                logger.info("Unmute timer set -> done")
+            #     logger.info(f"Unmute timer will start {unmuted_at}, target '{mute_word_str}'.")
+            #     logger.info("Unmute timer set -> done")
 
             # DB追加
             logger.info("DB upsert -> start")
