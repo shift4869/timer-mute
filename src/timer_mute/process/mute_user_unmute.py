@@ -34,15 +34,15 @@ class MuteUserUnmute(Base):
         try:
             # Muter インスタンスを作成し、選択ユーザーのミュートを解除する
             logger.info("Unmute by unmute_user -> start")
-            # config = self.main_window_info.config
-            # muter = Muter(config)
+            config = self.main_window_info.config
+            muter = Muter(config)
             for mute_user in mute_user_list:
                 # 選択ユーザーのミュートを解除
                 mute_user_str = mute_user[1]
-                # logger.info(f"Target user is '{mute_user_str}'.")
-                # r_dict = muter.unmute_user(mute_user_str)
-                # print(r_dict)
-                # logger.info(f"'{mute_user_str}' is unmuted.")
+                logger.info(f"Target user is '{mute_user_str}'.")
+                r_dict = muter.unmute_user(mute_user_str)
+                print(r_dict)
+                logger.info(f"'{mute_user_str}' is unmuted.")
 
                 # DB修正
                 logger.info("DB update -> start")
