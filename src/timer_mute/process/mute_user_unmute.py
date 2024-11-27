@@ -31,29 +31,33 @@ class MuteUserUnmute(Base):
             return Result.failed
         logger.info("Getting selected muted user -> start")
 
-        try:
-            # Muter インスタンスを作成し、選択ユーザーのミュートを解除する
-            logger.info("Unmute by unmute_user -> start")
-            config = self.main_window_info.config
-            muter = Muter(config)
-            for mute_user in mute_user_list:
+        # Muter インスタンスを作成し、選択ユーザーのミュートを解除する
+        logger.info("Unmute by unmute_user -> start")
+        config = self.main_window_info.config
+        muter = Muter(config)
+        for mute_user in mute_user_list:
+            try:
                 # 選択ユーザーのミュートを解除
                 mute_user_str = mute_user[1]
                 logger.info(f"Target user is '{mute_user_str}'.")
                 r_dict = muter.unmute_user(mute_user_str)
                 print(r_dict)
                 logger.info(f"'{mute_user_str}' is unmuted.")
+            except Exception as e:
+                # ミュートを解除しようとしたが失敗した
+                # またはすでにミュート解除済だった
+                logger.error(e)
+                pass
 
-                # DB修正
-                logger.info("DB update -> start")
-                self.main_window_info.mute_user_db.unmute(mute_user_str)
-                logger.info("DB update -> done")
-            logger.info("Unmute by unmute_user -> done")
-        except Exception as e:
-            raise e
-        finally:
-            # UI表示更新
-            self.update_mute_user_table()
+            # DB修正
+            logger.info("DB update -> start")
+            self.main_window_info.mute_user_db.unmute(mute_user_str)
+            logger.info("DB update -> done")
+
+        logger.info("Unmute by unmute_user -> done")
+
+        # UI表示更新
+        self.update_mute_user_table()
         logger.info("MUTE_USER_UNMUTE -> done")
         return Result.success
 
