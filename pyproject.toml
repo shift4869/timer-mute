@@ -9,19 +9,20 @@ dependencies = [
     "beautifulsoup4>=4.12.3",
     "coverage>=7.5.3",
     "freezegun>=1.5.1",
+    "httpx[http2]>=0.27.2",
     "isort>=5.13.2",
     "mock>=5.1.0",
+    "orjson==3.9.8",
     "pycodestyle>=2.11.1",
     "pysimplegui==4.60.5",
+    "requests>=2.32.3",
     "ruff>=0.4.8",
+    "selenium>=4.27.0",
     "sqlalchemy>=2.0.30",
     "twitter-api-client>=0.10.22",
-    "orjson==3.9.8",
-    "requests>=2.32.3",
-    "httpx[http2]>=0.27.2",
 ]
 readme = "README.md"
-requires-python = ">= 3.11"
+requires-python = ">= 3.12"
 
 [build-system]
 requires = ["hatchling"]

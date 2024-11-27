@@ -1,31 +1,29 @@
 import pprint
-import re
 from logging import INFO, getLogger
 from pathlib import Path
 from time import sleep
-from typing import cast
 
-import httpx
 import orjson
-from bs4 import BeautifulSoup
 from httpx import Response
-from requests.cookies import RequestsCookieJar
-# from requests_html import HTMLSession
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from twitter.account import Account
 from twitter.util import get_headers
 
-from timer_mute.muter.session import CookieSessionUserHandler
+from timer_mute.muter.code_challenge import CodeChallenger
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
 class Muter:
+    config_dict: dict
     account: Account
 
     def __init__(self, config_dict: dict) -> None:
         if not isinstance(config_dict, dict):
             raise ValueError("config_dict must be dict.")
+        self.config_dict = config_dict
         if not hasattr(self, "account"):
             twitter_api_client_config = config_dict["twitter_api_client"]
             ct0 = twitter_api_client_config["ct0"]
@@ -38,116 +36,93 @@ class Muter:
             cls._instance = super(Muter, cls).__new__(cls)
         return cls._instance
 
+    def get_endpoint_url(self, webapi_path: str) -> str:
+        domain = "https://x.com"
+        path_prefix = "/i/api/1.1/"
+        endpoint = f"{domain}{path_prefix}{webapi_path}"
+        return endpoint
+
+    def get_browser(self) -> webdriver.Chrome:
+        # シングルトン
+        if hasattr(self, "driver"):
+            if self.driver and isinstance(self.driver, webdriver.Chrome):
+                return self.driver
+
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # ヘッドレスモードを有効化
+        chrome_options.add_argument("--disable-gpu")  # GPUを無効化（古いバージョンのChrome向け）
+        chrome_options.add_argument("--window-size=1920x1080")  # ウィンドウサイズを指定
+        self.driver = webdriver.Chrome(options=chrome_options)
+        return self.driver
+
+    def get_client_transaction_id(self, webapi_path: str, method: str) -> dict:
+        logger.info("Getting client_transaction_id -> start")
+        path_prefix = "/i/api/1.1/"
+        path = f"{path_prefix}{webapi_path}"
+
+        code_challenge_data = CodeChallenger(config_dict=self.config_dict).get_challenge_data()
+        challenge_data = {
+            "action": "init",
+            "challenge": code_challenge_data["challenge"],
+            "verificationCode": code_challenge_data["verificationCode"],
+            "anims": code_challenge_data["anims"],
+        }
+
+        driver = self.get_browser()
+        file_path = (Path(__file__).parent / "solver.html").resolve()
+        driver.get(f"file:///{file_path}")
+        driver.execute_script(
+            """
+            window.postMessage(arguments[0], arguments[1]);
+            """,
+            challenge_data,
+            "*",
+        )
+        challenge_data = {
+            "action": "solve",
+            "path": path,
+            "method": method,
+            "id": "id",
+        }
+        driver.execute_script(
+            """
+            window.postMessage(arguments[0], arguments[1]);
+            """,
+            challenge_data,
+            "*",
+        )
+
+        client_transaction_id = None
+        for _ in range(10):
+            sleep(1)
+            client_transaction_id = driver.execute_script(
+                """
+                return window.lastMessage || null;
+                """
+            )
+            if client_transaction_id:
+                break
+
+        # driver.quit()
+        if not client_transaction_id:
+            logger.info("Getting client_transaction_id is failed.")
+            return ""
+        else:
+            logger.info(f"Obtained client_transaction_id is [ {client_transaction_id} ]")
+
+        logger.info("Getting client_transaction_id -> done")
+        return client_transaction_id
+
     def get_mute_keyword_list(self) -> dict:
         logger.info("Getting mute word list all -> start")
-        path = "mutes/keywords/list.json"
+        webapi_path = "mutes/keywords/list.json"
+        endpoint = self.get_endpoint_url(webapi_path)
         params = {}
         headers = get_headers(self.account.session)
 
-        # access_token_secret から Cookie を取得
-        cookies_dict: dict[str, str] = self.account.session.cookies
-
-        # RequestCookieJar オブジェクトに変換
-        cookies = RequestsCookieJar()
-        for key, value in cookies_dict.items():
-            cookies.set(key, value)
-
-        # 読み込んだ RequestCookieJar オブジェクトを CookieSessionUserHandler に渡す
-        # Cookie を指定する際はコンストラクタ内部で API リクエストは行われないため、ログイン時のように await する必要性はない
-        self.cookie_session_user_handler = CookieSessionUserHandler(cookies=cookies)
-        self.graphql_headers_dict = (
-            self.cookie_session_user_handler.get_graphql_api_headers()
-        )  # GraphQL API 用ヘッダー
-        self.html_headers_dict = self.cookie_session_user_handler.get_html_headers()  # HTML 用ヘッダー
-        self.js_headers_dict = self.cookie_session_user_handler.get_js_headers(
-            cross_origin=True
-        )  # JavaScript 用ヘッダー
-
-        cookies_dict = self.cookie_session_user_handler.get_cookies_as_dict()
-        cookies = httpx.Cookies()
-        for name, value in cookies_dict.items():
-            # ドメインを ".x.com" 、パスを "/" に設定しておくことが重要 (でないと Cookie 更新時にちゃんと上書きできない)
-            # ただし "lang" キーだけは ".x.com" でなく "x.com" にする必要がある
-            if name == "lang":
-                cookies.set(name, value, domain="x.com", path="/")
-            else:
-                cookies.set(name, value, domain=".x.com", path="/")
-
-        # httpx の非同期 HTTP クライアントのインスタンスを作成
-        # 可能な限り Chrome からのリクエストに偽装するため、app.constants.HTTPX_CLIENT は使わずに独自のインスタンスを作成する
-        self.httpx_client = httpx.Client(
-            # Cookie を設定
-            # Cookie はこの HTTP クライアントで行う全リクエストで共有されてほしいので、ここで設定している
-            # 一方リクエストヘッダーはリクエスト先のリソース種類によって異なるためここでは設定せず、リクエスト毎に個別に設定する
-            # (HTTP クライアントレベルで設定されたヘッダーは上書きや削除が難しそうなため)
-            cookies=cookies,
-            # リダイレクトを追跡する
-            follow_redirects=True,
-            # 可能な限り Chrome からのリクエストに偽装するため、HTTP/1.1 ではなく明示的に HTTP/2 で接続する
-            http2=True,
-        )
-
-        # Twitter Web App (SPA) の HTML を取得
-        # HTML リクエスト用のヘッダーに差し替えるのが重要
-        twitter_web_app_html = self.httpx_client.get("https://x.com/home", headers=self.html_headers_dict)
-        if twitter_web_app_html.status_code != 200:
-            logging.error(
-                f"[TwitterGraphQLAPI] Failed to fetch Twitter Web App HTML: {twitter_web_app_html.status_code}"
-            )
-            return ValueError(
-                f"Challenge 情報の取得に失敗しました。Twitter Web App の HTML を取得できませんでした。(HTTP Error {twitter_web_app_html.status_code})",
-            )
-        twitter_web_app_html_text = twitter_web_app_html.text
-
-        # BeautifulSoup を使って HTML をパース
-        soup = BeautifulSoup(twitter_web_app_html_text, "html.parser")
-
-        # HTML の meta タグに含まれる検証コードを取得
-        meta_tag = soup.select_one('meta[name="twitter-site-verification"]')
-        if meta_tag is None:
-            logging.error(f"[TwitterGraphQLAPI] Failed to fetch verification code from Twitter Web App HTML")
-            return ValueError(
-                "Challenge 情報の取得に失敗しました。Twitter Web App の HTML から検証コードを取得できませんでした。",
-            )
-        verification_code = cast(str, meta_tag["content"])
-
-        # HTML からチャレンジコードを取得
-        challenge_code_match = re.search(r'"ondemand.s":"(\w+)"', twitter_web_app_html_text)
-        if not challenge_code_match:
-            logging.error(f"[TwitterGraphQLAPI] Failed to fetch challenge code from Twitter Web App HTML")
-            return ValueError(
-                "Challenge 情報の取得に失敗しました。Twitter Web App の HTML からチャレンジコードを取得できませんでした。",
-            )
-        challenge_code = challenge_code_match.group(1)
-
-        # HTML からアニメーション SVG の outerHTML を取得
-        challenge_animation_svg_codes = [str(svg) for svg in soup.select('svg[id^="loading-x"]')]
-
-        # Challenge 情報を取得
-        # JavaScript リクエスト用のヘッダーに差し替えるのが重要
-        challenge_js_code_response = self.httpx_client.get(
-            url=f"https://abs.twimg.com/responsive-web/client-web/ondemand.s.{challenge_code}a.js",
-            headers=self.js_headers_dict,
-        )
-        if challenge_js_code_response.status_code != 200:
-            logging.error(f"[TwitterGraphQLAPI] Failed to fetch challenge code from Twitter Web App HTML")
-            return ValueError(
-                f"Challenge 情報の取得に失敗しました。Twitter Web App のチャレンジコードからチャレンジコードを取得できませんでした。"
-                f"(HTTP Error {challenge_js_code_response.status_code})"
-            )
-        challenge_js_code = challenge_js_code_response.text
-        challenge_result = (
-            verification_code,
-            challenge_js_code,
-            challenge_animation_svg_codes,
-        )
-
-        # solver_session = HTMLSession()
-
-        headers["x-client-transaction-id"] = (
-            "Cm9LTrTawONc60rPTfWVy/0ONFi9Y1VkW16PdOXH/s4BC+td+UXoEjFyNGLpCCTuQ5RS/giOVaMoWVfFOJ8PiK+YGVcbCQ"
-        )
-        r: Response = self.account.session.get(f"{self.account.v1_api}/{path}", headers=headers, params=params)
+        client_transaction_id = self.get_client_transaction_id(webapi_path, "GET")
+        headers["x-client-transaction-id"] = client_transaction_id
+        r: Response = self.account.session.get(endpoint, headers=headers, params=params)
         result: dict = r.json()
         logger.info("Getting mute word list all -> done")
         return result
@@ -157,14 +132,20 @@ class Muter:
             raise ValueError("keyword must be str.")
 
         logger.info(f"POST mute word mute, target is '{keyword}' -> start")
-        path = "mutes/keywords/create.json"
+        headers = get_headers(self.account.session)
+        webapi_path = "mutes/keywords/create.json"
+        endpoint = self.get_endpoint_url(webapi_path)
         payload = {
             "keyword": keyword,
             "mute_surfaces": "notifications,home_timeline,tweet_replies",
             "mute_option": "",
             "duration": "",
         }
-        result = self.account.v1(path, payload)
+        client_transaction_id = self.get_client_transaction_id(webapi_path, "POST")
+        headers["x-client-transaction-id"] = client_transaction_id
+        headers["content-type"] = "application/x-www-form-urlencoded"
+        r: Response = self.account.session.post(endpoint, headers=headers, data=payload)
+        result = r.json()
         logger.info(f"POST mute word mute, target is '{keyword}' -> done")
         return result
 
@@ -183,11 +164,17 @@ class Muter:
         target_keyword_dict = target_keyword_dict_list[0]
         unmute_keyword_id = target_keyword_dict.get("id")
 
-        path = "mutes/keywords/destroy.json"
+        headers = get_headers(self.account.session)
+        webapi_path = "mutes/keywords/destroy.json"
+        endpoint = self.get_endpoint_url(webapi_path)
         payload = {
             "ids": unmute_keyword_id,
         }
-        result = self.account.v1(path, payload)
+        client_transaction_id = self.get_client_transaction_id(webapi_path, "POST")
+        headers["x-client-transaction-id"] = client_transaction_id
+        headers["content-type"] = "application/x-www-form-urlencoded"
+        r: Response = self.account.session.post(endpoint, headers=headers, data=payload)
+        result = r.json()
         logger.info(f"POST muted word unmute, target is '{keyword}' -> done")
         return result
 
@@ -196,11 +183,17 @@ class Muter:
             raise ValueError("screen_name must be str.")
 
         logger.info(f"POST mute user mute, target is '{screen_name}' -> start")
-        path = "mutes/users/create.json"
+        headers = get_headers(self.account.session)
+        webapi_path = "mutes/users/create.json"
+        endpoint = self.get_endpoint_url(webapi_path)
         payload = {
             "screen_name": screen_name,
         }
-        result = self.account.v1(path, payload)
+        client_transaction_id = self.get_client_transaction_id(webapi_path, "POST")
+        headers["x-client-transaction-id"] = client_transaction_id
+        headers["content-type"] = "application/x-www-form-urlencoded"
+        r: Response = self.account.session.post(endpoint, headers=headers, data=payload)
+        result = r.json()
         logger.info(f"POST mute user mute, target is '{screen_name}' -> done")
         return result
 
@@ -209,11 +202,17 @@ class Muter:
             raise ValueError("screen_name must be str.")
 
         logger.info(f"POST muted user unmute, target is '{screen_name}' -> start")
-        path = "mutes/users/destroy.json"
+        headers = get_headers(self.account.session)
+        webapi_path = "mutes/users/destroy.json"
+        endpoint = self.get_endpoint_url(webapi_path)
         payload = {
             "screen_name": screen_name,
         }
-        result = self.account.v1(path, payload)
+        client_transaction_id = self.get_client_transaction_id(webapi_path, "POST")
+        headers["x-client-transaction-id"] = client_transaction_id
+        headers["content-type"] = "application/x-www-form-urlencoded"
+        r: Response = self.account.session.post(endpoint, headers=headers, data=payload)
+        result = r.json()
         logger.info(f"POST muted user unmute, target is '{screen_name}' -> done")
         return result
 
@@ -230,20 +229,22 @@ if __name__ == "__main__":
     r_dict = muter.get_mute_keyword_list()
     pprint.pprint(r_dict)
 
-    r_dict = muter.mute_keyword("てすと")
+    keyword = "てすと"
+    r_dict = muter.mute_keyword(keyword)
     pprint.pprint(r_dict)
     r_dict = muter.get_mute_keyword_list()
     pprint.pprint(r_dict)
     sleep(1)
 
-    target_keyword_dict: dict = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == "てすと"][0]
+    target_keyword_dict: dict = [d for d in r_dict.get("muted_keywords") if d.get("keyword") == keyword][0]
     unmute_keyword_id = target_keyword_dict.get("id")
-    r_dict = muter.unmute_keyword("てすと")
+    r_dict = muter.unmute_keyword(keyword)
     pprint.pprint(r_dict)
 
-    r_dict = muter.mute_user("SplatoonJP")
+    screen_name = "SplatoonJP"
+    r_dict = muter.mute_user(screen_name)
     pprint.pprint(r_dict)
     sleep(1)
 
-    r_dict = muter.unmute_user("SplatoonJP")
+    r_dict = muter.unmute_user(screen_name)
     pprint.pprint(r_dict)
